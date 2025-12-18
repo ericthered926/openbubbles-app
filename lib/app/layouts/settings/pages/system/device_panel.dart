@@ -56,7 +56,7 @@ class _DevicePanelState extends CustomState<DevicePanel, void, DevicePanelContro
     T result;
     try {
       result = await inner;
-    } catch (e, s) {
+    } catch (e) {
       Get.back();
       showSnackbar("Failure! Please try again", e.toString());
       rethrow;

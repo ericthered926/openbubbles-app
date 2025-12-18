@@ -30,7 +30,7 @@ class SettingsSwitch extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => onChanged.call(!initialVal),
-        splashColor: context.theme.colorScheme.surfaceVariant,
+        splashColor: context.theme.colorScheme.surfaceContainerHighest,
         splashFactory: context.theme.splashFactory,
         child: ListTile(
           mouseCursor: MouseCursor.defer,
@@ -47,7 +47,7 @@ class SettingsSwitch extends StatelessWidget {
           ),
           trailing: Switch(
             value: initialVal,
-            activeColor: context.theme.colorScheme.primary.lightenOrDarken(15),
+            activeThumbColor: context.theme.colorScheme.primary.lightenOrDarken(15),
             onChanged: onChanged,
           ),
           subtitle: subtitle != null ? Text(

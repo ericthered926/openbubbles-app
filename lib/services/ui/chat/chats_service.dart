@@ -17,9 +17,10 @@ import 'package:get/get.dart' hide Response;
 import 'package:tuple/tuple.dart';
 import 'package:universal_io/io.dart';
 import 'package:bluebubbles/database/database.dart';
-import 'package:bluebubbles/src/rust/api/api.dart' as api;
 
-ChatsService chats = Get.isRegistered<ChatsService>() ? Get.find<ChatsService>() : Get.put(ChatsService());
+ChatsService chats = Get.isRegistered<ChatsService>()
+    ? Get.find<ChatsService>()
+    : Get.put(ChatsService());
 
 class ChatsService extends GetxService {
   static const batchSize = 15;
@@ -41,7 +42,13 @@ class ChatsService extends GetxService {
     if (!kIsWeb) {
       // watch for new chats
       (() async {
-        final countQuery = (Database.chats.query(Chat_.dateDeleted.isNull().and(Chat_.telephonyId.isNull()).and(Chat_.isRoutingStub.equals(false).or(Chat_.isRoutingStub.isNull())))..order(Chat_.id, flags: Order.descending))
+        final countQuery = (Database.chats.query(Chat_.dateDeleted
+                .isNull()
+                .and(Chat_.telephonyId.isNull())
+                .and(Chat_.isRoutingStub
+                    .equals(false)
+                    .or(Chat_.isRoutingStub.isNull())))
+              ..order(Chat_.id, flags: Order.descending))
             .watch(triggerImmediately: true);
         countSub = countQuery.listen((event) async {
           if (!ss.settings.finishedSetup.value) return;
@@ -72,7 +79,8 @@ class ChatsService extends GetxService {
   Future<void> loadChatSuggestions() async {
     if (!Platform.isAndroid) return;
     if (chats.isNotEmpty) return;
-    List<String> recents = List<String>.from(await mcs.invokeMethod("recent-contacts"));
+    List<String> recents =
+        List<String>.from(await mcs.invokeMethod("recent-contacts"));
     await pushService.initFuture;
     List<String> suggestedHandles = [];
     while (recents.isNotEmpty && suggestedHandles.length < 3) {
@@ -84,9 +92,11 @@ class ChatsService extends GetxService {
         formattedList.add(await RustPushBBUtils.formatAndAddPrefix(item));
       }
       var handle = await (backend as RustPushBackend).getDefaultHandle();
-      suggestedHandles.addAll(await pushService.doValidateTargets(formattedList, handle));
+      suggestedHandles
+          .addAll(await pushService.doValidateTargets(formattedList, handle));
     }
-    List<Handle> results = suggestedHandles.map((s) => RustPushBBUtils.rustHandleToBB(s)).toList();
+    List<Handle> results =
+        suggestedHandles.map((s) => RustPushBBUtils.rustHandleToBB(s)).toList();
     this.suggestedHandles.value = results;
     Logger.info("response $suggestedHandles");
   }
@@ -94,10 +104,13 @@ class ChatsService extends GetxService {
   Future<void> init({bool force = false}) async {
     if (!force && !ss.settings.finishedSetup.value) return;
     Logger.info("Fetching chats... ${StackTrace.current}", tag: "ChatBloc");
-    currentCount = Chat.count() ?? (await backend.getRemoteService()?.chatCount().catchError((err) {
-      Logger.info("Error when fetching chat count!", tag: "ChatBloc");
-      return Response(requestOptions: RequestOptions(path: ''));
-    }))?.data['data']['total'] ?? 0;
+    currentCount = Chat.count() ??
+        (await backend.getRemoteService()?.chatCount().catchError((err) {
+          Logger.info("Error when fetching chat count!", tag: "ChatBloc");
+          return Response(requestOptions: RequestOptions(path: ''));
+        }))
+            ?.data['data']['total'] ??
+        0;
     loadedAllChats = Completer();
     if (currentCount != 0) {
       hasChats.value = true;
@@ -108,18 +121,22 @@ class ChatsService extends GetxService {
     }
 
     final newChats = <Chat>[];
-    final batches = (currentCount < batchSize) ? batchSize : (currentCount / batchSize).ceil();
+    final batches = (currentCount < batchSize)
+        ? batchSize
+        : (currentCount / batchSize).ceil();
 
     for (int i = 0; i < batches; i++) {
       List<Chat> temp;
       if (kIsWeb) {
-        temp = await cm.getChats(withLastMessage: true, limit: batchSize, offset: i * batchSize);
+        temp = await cm.getChats(
+            withLastMessage: true, limit: batchSize, offset: i * batchSize);
       } else {
         temp = await Chat.getChats(limit: batchSize, offset: i * batchSize);
       }
 
       if (kIsWeb) {
-        webCachedHandles.addAll(temp.map((e) => e.participants).flattened.toList());
+        webCachedHandles
+            .addAll(temp.map((e) => e.participants).flattened.toList());
         final ids = webCachedHandles.map((e) => e.address).toSet();
         webCachedHandles.retainWhere((element) => ids.remove(element.address));
       }
@@ -128,10 +145,13 @@ class ChatsService extends GetxService {
         cm.createChatController(c, active: cm.activeChat?.chat.guid == c.guid);
       }
       newChats.addAll(temp);
-      newChats.sort(Chat.sort);
+      // Update UI per batch for perceived performance (unsorted)
       chats.value = newChats;
       loadedChatBatch.value = true;
     }
+    // Sort once after all batches are loaded (optimization: was sorting per batch)
+    newChats.sort(Chat.sort);
+    chats.value = newChats;
     loadChatSuggestions();
     loadedAllChats.complete();
     Logger.info("Finished fetching chats (${chats.length}).", tag: "ChatBloc");
@@ -160,12 +180,16 @@ class ChatsService extends GetxService {
         if (uri == null) return;
 
         final address = uri.path;
-        final handle = Handle.findOne(addressAndService: Tuple2(address, "iMessage"));
+        final handle =
+            Handle.findOne(addressAndService: Tuple2(address, "iMessage"));
         ns.closeSettings(Get.context!);
         await ns.pushAndRemoveUntil(
           Get.context!,
           ChatCreator(
-            initialSelected: [SelectedContact(displayName: handle?.displayName ?? address, address: address)],
+            initialSelected: [
+              SelectedContact(
+                  displayName: handle?.displayName ?? address, address: address)
+            ],
             initialText: uri.queryParameters['body'],
           ),
           (route) => route.isFirst,
@@ -174,11 +198,19 @@ class ChatsService extends GetxService {
     }
 
     // prune older chats and messages
-    var c = Database.chats.query(Chat_.dateDeleted.lessThanDate(DateTime.now().subtract(const Duration(days: 30)))).build().find();
+    var c = Database.chats
+        .query(Chat_.dateDeleted
+            .lessThanDate(DateTime.now().subtract(const Duration(days: 30))))
+        .build()
+        .find();
     for (var chat in c) {
       Chat.deleteChat(chat);
     }
-    var messages = Database.messages.query(Message_.dateDeleted.lessThanDate(DateTime.now().subtract(const Duration(days: 30)))).build().find();
+    var messages = Database.messages
+        .query(Message_.dateDeleted
+            .lessThanDate(DateTime.now().subtract(const Duration(days: 30))))
+        .build()
+        .find();
     for (var message in messages) {
       Message.delete(message.guid!);
     }
@@ -196,7 +228,8 @@ class ChatsService extends GetxService {
     chats.sort(Chat.sort);
   }
 
-  bool updateChat(Chat updated, {bool shouldSort = false, bool override = false}) {
+  bool updateChat(Chat updated,
+      {bool shouldSort = false, bool override = false}) {
     final index = chats.indexWhere((e) => updated.guid == e.guid);
     if (index != -1) {
       // delete
@@ -227,17 +260,20 @@ class ChatsService extends GetxService {
   }
 
   void markAllAsRead() {
-    final _chats = Database.chats.query(Chat_.hasUnreadMessage.equals(true)).build().find();
+    final _chats = Database.chats
+        .query(Chat_.hasUnreadMessage.equals(true))
+        .build()
+        .find();
     for (Chat c in _chats) {
       c.hasUnreadMessage = false;
-      mcs.invokeMethod(
-        "delete-notification",
-        {
-          "notification_id": c.id,
-          "tag": NotificationsService.NEW_MESSAGE_TAG
-        }
-      );
-      backend.markRead(c, ss.settings.enablePrivateAPI.value && ss.settings.privateMarkChatAsRead.value);
+      mcs.invokeMethod("delete-notification", {
+        "notification_id": c.id,
+        "tag": NotificationsService.NEW_MESSAGE_TAG
+      });
+      backend.markRead(
+          c,
+          ss.settings.enablePrivateAPI.value &&
+              ss.settings.privateMarkChatAsRead.value);
     }
     Database.chats.putMany(_chats);
   }
@@ -260,7 +296,10 @@ class ChatsService extends GetxService {
   }
 
   void removePinIndices() {
-    chats.bigPinHelper(true).where((e) => e.pinIndex != null).forEach((element) {
+    chats
+        .bigPinHelper(true)
+        .where((e) => e.pinIndex != null)
+        .forEach((element) {
       element.pinIndex = null;
       element.save(updatePinIndex: true);
     });

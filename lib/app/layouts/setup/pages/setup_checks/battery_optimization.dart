@@ -5,7 +5,6 @@ import 'package:bluebubbles/app/layouts/setup/pages/page_template.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:shimmer/shimmer.dart';
 
 class BatteryOptimizationCheck extends StatelessWidget {
   final controller = Get.find<SetupViewController>();

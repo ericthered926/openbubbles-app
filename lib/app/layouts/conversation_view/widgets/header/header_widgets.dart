@@ -45,7 +45,7 @@ class ManualMarkState extends OptimizedState<ManualMark> {
                   : marking ? (iOS ? CupertinoIcons.arrow_2_circlepath : Icons.sync)
                   : marked ? (iOS ? CupertinoIcons.app : Icons.mark_chat_read_outlined)
                   : (iOS ? CupertinoIcons.app_badge : Icons.mark_chat_unread_outlined),
-              color: !iOS ? context.theme.colorScheme.onBackground
+              color: !iOS ? context.theme.colorScheme.onSurface
                   : (!marked && !marking || widget.controller.inSelectMode.value)
                   ? context.theme.colorScheme.primary
                   : context.theme.colorScheme.outline,
@@ -83,7 +83,7 @@ class ManualMarkState extends OptimizedState<ManualMark> {
             IconButton(
               icon: Icon(
                 iOS ? CupertinoIcons.arrow_right : Icons.forward_outlined,
-                color: !iOS ? context.theme.colorScheme.onBackground : context.theme.colorScheme.primary,
+                color: !iOS ? context.theme.colorScheme.onSurface : context.theme.colorScheme.primary,
               ),
               onPressed: () async {
                 List<PlatformFile> attachments = [];
@@ -225,7 +225,7 @@ class FaceTimeBtnState extends OptimizedState<FaceTimeBtn> {
         child: IconButton(
           icon: Icon(
             (iOS ? CupertinoIcons.video_camera : Icons.videocam_outlined),
-            color: !iOS ? context.theme.colorScheme.onBackground
+            color: !iOS ? context.theme.colorScheme.onSurface
                 : (!marked && !marking || widget.controller.inSelectMode.value)
                 ? context.theme.colorScheme.primary
                 : context.theme.colorScheme.outline,

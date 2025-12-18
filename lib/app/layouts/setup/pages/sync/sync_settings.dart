@@ -28,7 +28,9 @@ class SyncSettings extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 8),
               child: Text(
                 "Sync Options",
-                style: context.theme.textTheme.titleLarge!.copyWith(color: context.theme.colorScheme.properOnSurface),
+                style: context.theme.textTheme.titleLarge!.copyWith(
+                  color: context.theme.colorScheme.properOnSurface,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -42,7 +44,11 @@ class SyncSettings extends StatelessWidget {
                 children: [
                   Text(
                     "Skip empty chats",
-                    style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.properOnSurface).copyWith(height: 1.5),
+                    style: context.theme.textTheme.bodyLarge!
+                        .copyWith(
+                          color: context.theme.colorScheme.properOnSurface,
+                        )
+                        .copyWith(height: 1.5),
                     textAlign: TextAlign.center,
                   ),
                   StatefulSwitch(
@@ -55,16 +61,44 @@ class SyncSettings extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Text(
+                    "Sync messages from",
+                    style: context.theme.textTheme.bodyLarge!
+                        .copyWith(
+                            color: context.theme.colorScheme.properOnSurface)
+                        .copyWith(height: 1.5),
+                    textAlign: TextAlign.center,
+                  ),
+                  SyncDateRangeDropdown(parentController: controller),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
             if (!kIsWeb)
               Padding(
-                padding: const EdgeInsets.only(left: 40.0, right: 40.0, bottom: 20),
+                padding: const EdgeInsets.only(
+                  left: 40.0,
+                  right: 40.0,
+                  bottom: 20,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: [
                     Text(
                       "Save sync log to downloads",
-                      style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.properOnSurface).copyWith(height: 1.5),
+                      style: context.theme.textTheme.bodyLarge!
+                          .copyWith(
+                            color: context.theme.colorScheme.properOnSurface,
+                          )
+                          .copyWith(height: 1.5),
                       textAlign: TextAlign.center,
                     ),
                     StatefulSwitch(
@@ -92,20 +126,29 @@ class SyncSettings extends StatelessWidget {
         child: ElevatedButton(
           style: ButtonStyle(
             shape: WidgetStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
             ),
             backgroundColor: WidgetStateProperty.all(Colors.transparent),
             shadowColor: WidgetStateProperty.all(Colors.transparent),
-            maximumSize: WidgetStateProperty.all(Size(context.width * 2 / 3, 36)),
-            minimumSize: WidgetStateProperty.all(Size(context.width * 2 / 3, 36)),
+            maximumSize: WidgetStateProperty.all(
+              Size(context.width * 2 / 3, 36),
+            ),
+            minimumSize: WidgetStateProperty.all(
+              Size(context.width * 2 / 3, 36),
+            ),
           ),
           onPressed: () {
-            final numberOfMessagesPerPage = controller.numberToDownload.clamp(1, double.infinity).toInt();
+            final numberOfMessagesPerPage =
+                controller.numberToDownload.clamp(1, double.infinity).toInt();
             final skipEmptyChats = controller.skipEmptyChats;
             final saveToDownloads = controller.saveToDownloads;
-            setup.startSetup(numberOfMessagesPerPage, skipEmptyChats, saveToDownloads);
+            final syncStartDate = controller.syncStartDate;
+            setup.startSetup(
+              numberOfMessagesPerPage,
+              skipEmptyChats,
+              saveToDownloads,
+              syncStartDate: syncStartDate,
+            );
 
             controller.pageController.nextPage(
               duration: const Duration(milliseconds: 300),
@@ -115,14 +158,14 @@ class SyncSettings extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                CupertinoIcons.cloud_download,
-                color: Colors.white,
-              ),
+              const Icon(CupertinoIcons.cloud_download, color: Colors.white),
               const SizedBox(width: 10),
               Text(
-                  "Start Sync",
-                  style: context.theme.textTheme.bodyLarge!.apply(fontSizeFactor: 1.1, color: Colors.white)
+                "Start Sync",
+                style: context.theme.textTheme.bodyLarge!.apply(
+                  fontSizeFactor: 1.1,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
@@ -139,8 +182,8 @@ class NumberOfMessagesText extends CustomStateful<SetupViewController> {
   State<StatefulWidget> createState() => _NumberOfMessagesTextState();
 }
 
-class _NumberOfMessagesTextState extends CustomState<NumberOfMessagesText, int, SetupViewController> {
-
+class _NumberOfMessagesTextState
+    extends CustomState<NumberOfMessagesText, int, SetupViewController> {
   @override
   void updateWidget(int newVal) {
     controller.numberToDownload = newVal;
@@ -158,10 +201,12 @@ class _NumberOfMessagesTextState extends CustomState<NumberOfMessagesText, int, 
             alignment: Alignment.centerLeft,
             child: Text(
               "We will now download the first ${controller.numberToDownload == 0 ? "message" : "${controller.numberToDownload.toString().split(".").first} messages"} for each of your chats.\nYou can see more messages by simply scrolling up in the chat.",
-              style: context.theme.textTheme.bodyLarge!.apply(
-                fontSizeDelta: 1.5,
-                color: context.theme.colorScheme.outline,
-              ).copyWith(height: 1),
+              style: context.theme.textTheme.bodyLarge!
+                  .apply(
+                    fontSizeDelta: 1.5,
+                    color: context.theme.colorScheme.outline,
+                  )
+                  .copyWith(height: 1),
             ),
           ),
         ),
@@ -171,9 +216,9 @@ class _NumberOfMessagesTextState extends CustomState<NumberOfMessagesText, int, 
             alignment: Alignment.centerLeft,
             child: Text(
               "Note: If the syncing gets stuck, try reducing the number of messages to sync to 1.",
-              style: context.theme.textTheme.bodyLarge!.apply(
-                color: context.theme.colorScheme.outline,
-              ).copyWith(height: 1),
+              style: context.theme.textTheme.bodyLarge!
+                  .apply(color: context.theme.colorScheme.outline)
+                  .copyWith(height: 1),
             ),
           ),
         ),
@@ -189,7 +234,8 @@ class NumberOfMessagesSlider extends CustomStateful<SetupViewController> {
   State<StatefulWidget> createState() => _NumberOfMessagesSliderState();
 }
 
-class _NumberOfMessagesSliderState extends CustomState<NumberOfMessagesSlider, int, SetupViewController> {
+class _NumberOfMessagesSliderState
+    extends CustomState<NumberOfMessagesSlider, int, SetupViewController> {
   double numberOfMessages = 25;
 
   @override
@@ -201,7 +247,9 @@ class _NumberOfMessagesSliderState extends CustomState<NumberOfMessagesSlider, i
           padding: const EdgeInsets.all(8.0),
           child: Text(
             "Number of Messages to Sync Per Chat: $numberOfMessages",
-            style: context.theme.textTheme.bodyLarge!.copyWith(color: context.theme.colorScheme.properOnSurface).copyWith(height: 1.5),
+            style: context.theme.textTheme.bodyLarge!
+                .copyWith(color: context.theme.colorScheme.properOnSurface)
+                .copyWith(height: 1.5),
             textAlign: TextAlign.center,
           ),
         ),
@@ -228,7 +276,7 @@ class StatefulSwitch extends CustomStateful<SetupViewController> {
   StatefulSwitch({
     required super.parentController,
     required this.initial,
-    required this.update
+    required this.update,
   });
 
   final bool initial;
@@ -238,7 +286,8 @@ class StatefulSwitch extends CustomStateful<SetupViewController> {
   State<StatefulWidget> createState() => _StatefulSwitchState();
 }
 
-class _StatefulSwitchState extends CustomState<StatefulSwitch, int, SetupViewController> {
+class _StatefulSwitchState
+    extends CustomState<StatefulSwitch, int, SetupViewController> {
   late bool value;
 
   @override
@@ -256,6 +305,72 @@ class _StatefulSwitchState extends CustomState<StatefulSwitch, int, SetupViewCon
         setState(() {
           value = newVal;
         });
+      },
+    );
+  }
+}
+
+/// Dropdown widget for selecting how far back to sync messages
+class SyncDateRangeDropdown extends CustomStateful<SetupViewController> {
+  SyncDateRangeDropdown({required super.parentController});
+
+  @override
+  State<StatefulWidget> createState() => _SyncDateRangeDropdownState();
+}
+
+class _SyncDateRangeDropdownState
+    extends CustomState<SyncDateRangeDropdown, int, SetupViewController> {
+  // Preset options: value is days ago (0 = all time)
+  static const List<Map<String, dynamic>> _options = [
+    {'label': 'Last month', 'days': 30},
+    {'label': 'Last 3 months', 'days': 90},
+    {'label': 'Last 6 months', 'days': 180},
+    {'label': 'Last year', 'days': 365},
+    {'label': 'All time', 'days': 0},
+  ];
+
+  // Default to 1 year for optimal performance
+  int _selectedDays = 365;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set default syncStartDate to 1 year ago
+    _updateSyncStartDate(_selectedDays);
+  }
+
+  void _updateSyncStartDate(int days) {
+    if (days == 0) {
+      // All time - null means no filter
+      controller.syncStartDate = null;
+    } else {
+      // Calculate timestamp for X days ago
+      final startDate = DateTime.now().subtract(Duration(days: days));
+      controller.syncStartDate = startDate.millisecondsSinceEpoch;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButton<int>(
+      value: _selectedDays,
+      underline: Container(),
+      dropdownColor: context.theme.colorScheme.surface,
+      style: context.theme.textTheme.bodyLarge!
+          .copyWith(color: context.theme.colorScheme.primary),
+      items: _options.map((option) {
+        return DropdownMenuItem<int>(
+          value: option['days'] as int,
+          child: Text(option['label'] as String),
+        );
+      }).toList(),
+      onChanged: (int? newValue) {
+        if (newValue != null) {
+          setState(() {
+            _selectedDays = newValue;
+          });
+          _updateSyncStartDate(newValue);
+        }
       },
     );
   }

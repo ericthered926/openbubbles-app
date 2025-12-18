@@ -1,12 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:bluebubbles/app/components/custom_text_editing_controllers.dart';
 import 'package:bluebubbles/app/layouts/chat_creator/widgets/chat_creator_tile.dart';
-import 'package:bluebubbles/app/layouts/conversation_view/pages/conversation_view.dart';
-import 'package:bluebubbles/app/layouts/conversation_view/widgets/text_field/conversation_text_field.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
-import 'package:bluebubbles/app/wrappers/titlebar_wrapper.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/conversation_view/pages/messages_view.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
@@ -17,7 +13,6 @@ import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:bluebubbles/utils/string_utils.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +20,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_acrylic/window_effect.dart';
 import 'package:get/get.dart' hide Response;
-import 'package:slugify/slugify.dart';
 import 'package:tuple/tuple.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
 
@@ -200,7 +194,7 @@ class FaceTimeCreatorState extends OptimizedState<FaceTimeCreator> {
       value: SystemUiOverlayStyle(
         systemNavigationBarColor: ss.settings.immersiveMode.value
             ? Colors.transparent
-            : context.theme.colorScheme.background, // navigation bar color
+            : context.theme.colorScheme.surface, // navigation bar color
         systemNavigationBarIconBrightness: context.theme.colorScheme.brightness.opposite,
         statusBarColor: Colors.transparent, // status bar color
         statusBarIconBrightness: context.theme.colorScheme.brightness.opposite,
@@ -208,7 +202,7 @@ class FaceTimeCreatorState extends OptimizedState<FaceTimeCreator> {
       child: Scaffold(
         backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled
             ? Colors.transparent
-            : context.theme.colorScheme.background,
+            : context.theme.colorScheme.surface,
         appBar: PreferredSize(
           preferredSize: Size(ns.width(context), kIsDesktop ? 90 : 50),
           child: AppBar(
@@ -430,7 +424,9 @@ class FaceTimeCreatorState extends OptimizedState<FaceTimeCreator> {
                                                 child: InkWell(
                                                   onTap: () {
                                                     if (selectedContacts.firstWhereOrNull((c) => c.address == e) !=
-                                                        null) return;
+                                                        null) {
+                                                      return;
+                                                    }
                                                     addSelected(
                                                         SelectedContact(displayName: contact.displayName, address: e));
                                                   },
@@ -447,7 +443,9 @@ class FaceTimeCreatorState extends OptimizedState<FaceTimeCreator> {
                                                 child: InkWell(
                                                   onTap: () {
                                                     if (selectedContacts.firstWhereOrNull((c) => c.address == e) !=
-                                                        null) return;
+                                                        null) {
+                                                      return;
+                                                    }
                                                     addSelected(
                                                         SelectedContact(displayName: contact.displayName, address: e));
                                                   },

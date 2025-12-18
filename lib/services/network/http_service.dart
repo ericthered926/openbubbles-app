@@ -56,7 +56,7 @@ class HttpBackend implements BackendService {
   @override
   Future<Map<String, dynamic>> getAccountInfo() async {
     var result = await http.getAccountInfo();
-    if (!isNullOrEmpty(result.data.isNotEmpty)!) {
+    if (!isNullOrEmpty(result.data.isNotEmpty)) {
       return result.data['data'];
     }
     return {};
@@ -71,7 +71,7 @@ class HttpBackend implements BackendService {
   Future<Map<String, dynamic>> getAccountContact() async {
     if (ss.isMinBigSurSync) {
       final result2 = await http.getAccountContact();
-      if (!isNullOrEmpty(result2.data.isNotEmpty)!) {
+      if (!isNullOrEmpty(result2.data.isNotEmpty)) {
         return result2.data['data'];
       }
     }

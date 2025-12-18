@@ -32,7 +32,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:mime_type/mime_type.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:slugify/slugify.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:tuple/tuple.dart';
 import 'package:universal_io/io.dart';
@@ -41,7 +40,6 @@ import '../network/backend_service.dart';
 import 'package:dio/dio.dart';
 import 'package:uuid/uuid.dart';
 import 'package:dlibphonenumber/dlibphonenumber.dart';
-import 'package:telephony_plus/telephony_plus.dart';
 import 'package:vpn_connection_detector/vpn_connection_detector.dart';
 import 'package:convert/convert.dart';
 import 'package:bluebubbles/helpers/types/constants.dart' as constants;
@@ -3016,7 +3014,7 @@ class RustPushService extends GetxService {
   Future handleMsg(api.PushMessage push, bool finalAttempt) async {
     try {
       await handleMsgInner(push);
-    } catch (e, s) {
+    } catch (e) {
       if (finalAttempt) markCertified(push);
       rethrow;
     }
@@ -4105,7 +4103,7 @@ class RustPushService extends GetxService {
     T result;
     try {
       result = await inner;
-    } catch (e, s) {
+    } catch (e) {
       Get.back();
       showSnackbar("Failure! Please try again", e.toString());
       rethrow;

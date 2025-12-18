@@ -11,8 +11,8 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
+import 'package:bluebubbles/services/backend/sync/handle_cache.dart';
 import 'package:collection/collection.dart';
-import 'package:dlibphonenumber/generated/metadata/phone_number/CH.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Condition;
@@ -22,54 +22,56 @@ import 'package:metadata_fetch/metadata_fetch.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:telephony_plus/telephony_plus.dart';
-import 'package:telephony_plus/src/models/attachment.dart' as TelephonyAttachment;
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
 import 'package:tuple/tuple.dart';
 import 'dart:typed_data';
 import 'package:convert/convert.dart';
 
-const IS_FINISHED               = 1 << 0; // this one probably, although there are some unset in db, all are set on local db
-const IS_EMOTE                  = 1 << 1;
-const IS_FROM_ME                = 1 << 2;
-const IS_EMPTY                  = 1 << 3;
-const IS_DELAYED                = 1 << 5;
-const IS_AUTO_REPLY             = 1 << 6;
-const IS_PREPARED               = 1 << 11;
-const IS_DELIVERED              = 1 << 12;
-const IS_READ                   = 1 << 13;
-const IS_SYSTEM_MESSAGE         = 1 << 14;
-const IS_SENT                   = 1 << 15;
-const HAS_DD_RESULTS            = 1 << 16;
-const IS_SERVICE_MESSAGE        = 1 << 17;
-const IS_FORWARD                = 1 << 18;
-const WAS_DOWNGRADED            = 1 << 19;
-const WAS_DATA_DETECTED         = 1 << 20;
-const IS_AUDIO_MESSAGE          = 1 << 21;
-const IS_PLAYED                 = 1 << 22;
-const IS_EXPIRABLE              = 1 << 24;
-const MESSAGE_SOURCE            = 1 << 25;
-const IS_CORRUPT                = 1 << 26;
-const IS_SPAM                   = 1 << 27;
-const HAS_UNKNOWN_MENTION       = 1 << 28;
-const IS_STEWIE                 = 1 << 33;
-const WAS_DELIVERED_QUIETLY     = 1 << 34;
-const DID_NOTIFY_RECIPIENT      = 1 << 35;
-const WAS_DETONATED             = 1 << 36;
-const IS_KT_VERIFIED            = 1 << 37;
-const IS_CRITICAL               = 1 << 38;
-const IS_SOS                    = 1 << 39;
+const IS_FINISHED = 1 <<
+    0; // this one probably, although there are some unset in db, all are set on local db
+const IS_EMOTE = 1 << 1;
+const IS_FROM_ME = 1 << 2;
+const IS_EMPTY = 1 << 3;
+const IS_DELAYED = 1 << 5;
+const IS_AUTO_REPLY = 1 << 6;
+const IS_PREPARED = 1 << 11;
+const IS_DELIVERED = 1 << 12;
+const IS_READ = 1 << 13;
+const IS_SYSTEM_MESSAGE = 1 << 14;
+const IS_SENT = 1 << 15;
+const HAS_DD_RESULTS = 1 << 16;
+const IS_SERVICE_MESSAGE = 1 << 17;
+const IS_FORWARD = 1 << 18;
+const WAS_DOWNGRADED = 1 << 19;
+const WAS_DATA_DETECTED = 1 << 20;
+const IS_AUDIO_MESSAGE = 1 << 21;
+const IS_PLAYED = 1 << 22;
+const IS_EXPIRABLE = 1 << 24;
+const MESSAGE_SOURCE = 1 << 25;
+const IS_CORRUPT = 1 << 26;
+const IS_SPAM = 1 << 27;
+const HAS_UNKNOWN_MENTION = 1 << 28;
+const IS_STEWIE = 1 << 33;
+const WAS_DELIVERED_QUIETLY = 1 << 34;
+const DID_NOTIFY_RECIPIENT = 1 << 35;
+const WAS_DETONATED = 1 << 36;
+const IS_KT_VERIFIED = 1 << 37;
+const IS_CRITICAL = 1 << 38;
+const IS_SOS = 1 << 39;
 const IS_PENDING_SATELLITE_SEND = 1 << 41;
-const NEEDS_RELAY               = 1 << 42;
+const NEEDS_RELAY = 1 << 42;
 const SENT_OR_RECEIVED_OFF_GRID = 1 << 43;
 
 /// Async method to fetch attachments
-class GetMessageAttachments extends AsyncTask<List<dynamic>, Map<String, List<Attachment?>>> {
+class GetMessageAttachments
+    extends AsyncTask<List<dynamic>, Map<String, List<Attachment?>>> {
   final List<dynamic> stuff;
 
   GetMessageAttachments(this.stuff);
 
   @override
-  AsyncTask<List<dynamic>, Map<String, List<Attachment?>>> instantiate(List<dynamic> parameters,
+  AsyncTask<List<dynamic>, Map<String, List<Attachment?>>> instantiate(
+      List<dynamic> parameters,
       [Map<String, SharedData>? sharedData]) {
     return GetMessageAttachments(parameters);
   }
@@ -89,7 +91,8 @@ class GetMessageAttachments extends AsyncTask<List<dynamic>, Map<String, List<At
       final messages = Database.messages.getMany(messageIds);
 
       /// Add the attachments to the map with some clever list operations
-      map.addEntries(messages.mapIndexed((index, e) => MapEntry(e!.guid!, e.dbAttachments)));
+      map.addEntries(messages
+          .mapIndexed((index, e) => MapEntry(e!.guid!, e.dbAttachments)));
       return map;
     });
   }
@@ -102,7 +105,8 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
   BulkSaveNewMessages(this.params);
 
   @override
-  AsyncTask<List<dynamic>, List<Message>> instantiate(List<dynamic> parameters, [Map<String, SharedData>? sharedData]) {
+  AsyncTask<List<dynamic>, List<Message>> instantiate(List<dynamic> parameters,
+      [Map<String, SharedData>? sharedData]) {
     return BulkSaveNewMessages(parameters);
   }
 
@@ -132,7 +136,8 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
       /// to the objectbox Database.
       Chat inputChat = params[0];
       List<Message> inputMessages = params[1];
-      List<String> inputMessageGuids = inputMessages.map((element) => element.guid!).toList();
+      List<String> inputMessageGuids =
+          inputMessages.map((element) => element.guid!).toList();
 
       // 0. Create map for the messages and attachments to save
       Map<String, Attachment> attachmentsToSave = {};
@@ -156,10 +161,16 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
       // 1. Check for existing attachments and save new ones
       Map<String, Attachment> attachmentMap = {};
       if (attachmentsToSave.isNotEmpty) {
-        List<String> inputAttachmentGuids = attachmentsToSave.values.map((e) => e.guid).whereNotNull().toList();
-        QueryBuilder<Attachment> attachmentQuery = Database.attachments.query(Attachment_.guid.oneOf(inputAttachmentGuids));
-        List<String> existingAttachmentGuids =
-            attachmentQuery.build().find().map((e) => e.guid).whereNotNull().toList();
+        List<String> inputAttachmentGuids =
+            attachmentsToSave.values.map((e) => e.guid).whereNotNull().toList();
+        QueryBuilder<Attachment> attachmentQuery = Database.attachments
+            .query(Attachment_.guid.oneOf(inputAttachmentGuids));
+        List<String> existingAttachmentGuids = attachmentQuery
+            .build()
+            .find()
+            .map((e) => e.guid)
+            .whereNotNull()
+            .toList();
 
         // Insert the attachments that don't yet exist
         List<Attachment> attachmentsToInsert = attachmentsToSave.values
@@ -169,8 +180,10 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
         Database.attachments.putMany(attachmentsToInsert);
 
         // 2. Fetch all inserted/existing attachments based on input
-        QueryBuilder<Attachment> attachmentQuery2 = Database.attachments.query(Attachment_.guid.oneOf(inputAttachmentGuids));
-        List<Attachment> attachments = attachmentQuery2.build().find().whereNotNull().toList();
+        QueryBuilder<Attachment> attachmentQuery2 = Database.attachments
+            .query(Attachment_.guid.oneOf(inputAttachmentGuids));
+        List<Attachment> attachments =
+            attachmentQuery2.build().find().whereNotNull().toList();
 
         // 3. Create map of inserted/existing attachments
         for (final a in attachments) {
@@ -179,22 +192,40 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
       }
 
       // 4. Check for existing messages & create list of new messages to save
-      QueryBuilder<Message> query = Database.messages.query(Message_.guid.oneOf(inputMessageGuids));
-      List<String> existingMessageGuids = query.build().find().map((e) => e.guid!).toList();
-      inputMessages = inputMessages.where((element) => !existingMessageGuids.contains(element.guid)).toList();
+      QueryBuilder<Message> query =
+          Database.messages.query(Message_.guid.oneOf(inputMessageGuids));
+      List<String> existingMessageGuids =
+          query.build().find().map((e) => e.guid!).toList();
+      inputMessages = inputMessages
+          .where((element) => !existingMessageGuids.contains(element.guid))
+          .toList();
 
-      // 5. Fetch all handles and map the old handle ROWIDs from each message to the new ones based on the original ROWID
-      List<Handle> handles = Database.handles.getAll();
+      // 5. Fetch handles using cache (optimization: uses LRU cache with DB fallback)
+      // Get unique handle ROWIDs from messages
+      final handleRowIds = inputMessages
+          .map((m) => m.handleId)
+          .where((id) => id != null && id > 0)
+          .cast<int>()
+          .toSet()
+          .toList();
+
+      // Use cache for handle lookups (queries DB only for cache misses)
+      final handleMap = handleRowIds.isNotEmpty
+          ? handleCache.getByRowIds(handleRowIds)
+          : <int, Handle>{};
 
       for (final msg in inputMessages) {
         msg.chat.target = inputChat;
-        msg.handle = handles.firstWhereOrNull((e) => e.originalROWID == msg.handleId);
+        msg.handle = msg.handleId != null ? handleMap[msg.handleId!] : null;
       }
 
       // 6. Relate the attachments to the messages
       for (final msg in inputMessages) {
-        final relatedAttachments =
-            messageAttachments[msg.guid]?.map((e) => attachmentMap[e]).whereNotNull().toList() ?? [];
+        final relatedAttachments = messageAttachments[msg.guid]
+                ?.map((e) => attachmentMap[e])
+                .whereNotNull()
+                .toList() ??
+            [];
         msg.attachments = relatedAttachments;
         msg.dbAttachments.addAll(relatedAttachments);
       }
@@ -203,24 +234,29 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
       Database.messages.putMany(inputMessages);
 
       // 8. Get the inserted messages
-      QueryBuilder<Message> messageQuery = Database.messages.query(Message_.guid.oneOf(inputMessageGuids));
+      QueryBuilder<Message> messageQuery =
+          Database.messages.query(Message_.guid.oneOf(inputMessageGuids));
       List<Message> messages = messageQuery.build().find().toList();
 
       // 9. Check inserted messages for associated message GUIDs & update hasReactions flag
       Map<String, Message> messagesToUpdate = {};
       for (final message in messages) {
         // Update the handles from our cache
-        message.handle = handles.firstWhereOrNull((element) => element.originalROWID == message.handleId);
+        message.handle =
+            message.handleId != null ? handleMap[message.handleId!] : null;
 
         // Continue if there isn't an associated message GUID to process
         if ((message.associatedMessageGuid ?? '').isEmpty) continue;
 
         // Find the associated message in the DB and update the hasReactions flag
-        List<Message> associatedMessages =
-            Message.find(cond: Message_.guid.equals(message.associatedMessageGuid!)).toList();
+        List<Message> associatedMessages = Message.find(
+                cond: Message_.guid.equals(message.associatedMessageGuid!))
+            .toList();
         if (associatedMessages.isNotEmpty) {
           // Toggle the hasReactions flag
-          Message messageWithReaction = messagesToUpdate[associatedMessages[0].guid] ?? associatedMessages[0];
+          Message messageWithReaction =
+              messagesToUpdate[associatedMessages[0].guid] ??
+                  associatedMessages[0];
           messageWithReaction.hasReactions = true;
 
           // Make sure the current message has the associated message in it's list, and the hasReactions
@@ -257,7 +293,8 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
       if (messages.isNotEmpty) {
         final first = messages.first;
         if (first.id != null || kIsWeb) {
-          isNewer = first.dateCreated!.isAfter(inputChat.latestMessage.dateCreated!);
+          isNewer =
+              first.dateCreated!.isAfter(inputChat.latestMessage.dateCreated!);
           if (isNewer) {
             inputChat.latestMessage = first;
             if (!first.isFromMe! && !cm.isChatActive(inputChat.guid)) {
@@ -328,7 +365,8 @@ class Message {
   String? sendingServiceId;
 
   String? amkSessionId; // for sessioned messages
-  bool hasBeenForwarded; // local SMS forwarding, used to keep track of this message needs to be sent locally via SMS
+  bool
+      hasBeenForwarded; // local SMS forwarding, used to keep track of this message needs to be sent locally via SMS
   String? stagingGuid;
 
   String? ckRecordId;
@@ -360,23 +398,30 @@ class Message {
 
   final chat = ToOne<Chat>();
 
-  String? get dbAttributedBody => jsonEncode(attributedBody.map((e) => e.toMap()).toList());
+  String? get dbAttributedBody =>
+      jsonEncode(attributedBody.map((e) => e.toMap()).toList());
   set dbAttributedBody(String? json) => attributedBody = json == null
-      ? <AttributedBody>[] : (jsonDecode(json) as List).map((e) => AttributedBody.fromMap(e)).toList();
+      ? <AttributedBody>[]
+      : (jsonDecode(json) as List)
+          .map((e) => AttributedBody.fromMap(e))
+          .toList();
 
-  String? get dbMessageSummaryInfo => jsonEncode(messageSummaryInfo.map((e) => e.toJson()).toList());
+  String? get dbMessageSummaryInfo =>
+      jsonEncode(messageSummaryInfo.map((e) => e.toJson()).toList());
   set dbMessageSummaryInfo(String? json) => messageSummaryInfo = json == null
-      ? <MessageSummaryInfo>[] : (jsonDecode(json) as List).map((e) => MessageSummaryInfo.fromJson(e)).toList();
+      ? <MessageSummaryInfo>[]
+      : (jsonDecode(json) as List)
+          .map((e) => MessageSummaryInfo.fromJson(e))
+          .toList();
 
-  String? get dbPayloadData => payloadData == null
-      ? null : jsonEncode(payloadData!.toJson());
-  set dbPayloadData(String? json) => payloadData = json == null
-      ? null : PayloadData.fromJson(jsonDecode(json));
+  String? get dbPayloadData =>
+      payloadData == null ? null : jsonEncode(payloadData!.toJson());
+  set dbPayloadData(String? json) => payloadData =
+      json == null ? null : PayloadData.fromJson(jsonDecode(json));
 
-  String? get dbMetadata => metadata == null
-      ? null : jsonEncode(metadata);
-  set dbMetadata(String? json) => metadata = json == null
-      ? null : jsonDecode(json) as Map<String, dynamic>;
+  String? get dbMetadata => metadata == null ? null : jsonEncode(metadata);
+  set dbMetadata(String? json) =>
+      metadata = json == null ? null : jsonDecode(json) as Map<String, dynamic>;
 
   DateTime? get chatViewDate => dateScheduled ?? dateCreated;
 
@@ -384,11 +429,11 @@ class Message {
   @Transient()
   bool temp = false;
 
-
   Future<void> forwardIfNessesary(Chat chat, {bool markFailed = false}) async {
-    if (hasBeenForwarded || !chat.isTextForwarding || !(isFromMe ?? true)) return;
+    if (hasBeenForwarded || !chat.isTextForwarding || !(isFromMe ?? true)) {
+      return;
+    }
     if (!await chat.shouldRoute()) return;
-
 
     hasBeenForwarded = true;
     save(chat: chat);
@@ -402,11 +447,14 @@ class Message {
       int status;
       if (useMMS) {
         status = await TelephonyPlus().sendMMS(
-          addresses: chat.participants.map((e) => e.address).filter((e) => e.isPhoneNumber).toList(),
-          message: text?.trim() == "" ? null : text,
-          threadId: chat.telephonyId,
-          attachments: await Future.wait(attachments.map((e) => e!.toTelephony()).toList())
-        );
+            addresses: chat.participants
+                .map((e) => e.address)
+                .filter((e) => e.isPhoneNumber)
+                .toList(),
+            message: text?.trim() == "" ? null : text,
+            threadId: chat.telephonyId,
+            attachments: await Future.wait(
+                attachments.map((e) => e!.toTelephony()).toList()));
       } else {
         status = await TelephonyPlus().sendSMS(
           address: chat.participants.first.address,
@@ -419,8 +467,8 @@ class Message {
         hasBeenForwarded = false;
         save(chat: chat);
         if (markFailed) {
-
-          if (!ls.isAlive || !(cm.getChatController(chat.guid)?.isAlive ?? false)) {
+          if (!ls.isAlive ||
+              !(cm.getChatController(chat.guid)?.isAlive ?? false)) {
             await notif.createFailedToSend(chat);
           }
           return;
@@ -489,30 +537,37 @@ class Message {
     this.temp = false,
     this.ckRecordId,
   }) {
-      if (handle != null && handleId == null) handleId = handle!.originalROWID;
-      if (error != null) _error.value = error;
-      if (dateRead != null) _dateRead.value = dateRead;
-      if (dateDelivered != null) _dateDelivered.value = dateDelivered;
-      if (dateEdited != null) _dateEdited.value = dateEdited;
-      if (isDelievered != null) _isDelivered.value = isDelievered;
-      if (attachments.isEmpty) attachments = [];
-      if (associatedMessages.isEmpty) associatedMessages = [];
-      if (attributedBody.isEmpty) attributedBody = [];
-      if (messageSummaryInfo.isEmpty) messageSummaryInfo = [];
+    if (handle != null && handleId == null) handleId = handle!.originalROWID;
+    if (error != null) _error.value = error;
+    if (dateRead != null) _dateRead.value = dateRead;
+    if (dateDelivered != null) _dateDelivered.value = dateDelivered;
+    if (dateEdited != null) _dateEdited.value = dateEdited;
+    if (isDelievered != null) _isDelivered.value = isDelievered;
+    if (attachments.isEmpty) attachments = [];
+    if (associatedMessages.isEmpty) associatedMessages = [];
+    if (attributedBody.isEmpty) attributedBody = [];
+    if (messageSummaryInfo.isEmpty) messageSummaryInfo = [];
   }
 
   factory Message.fromMap(Map<String, dynamic> json) {
-    final attachments = (json['attachments'] as List? ?? []).map((a) => Attachment.fromMap(a!.cast<String, Object>())).toList();
+    final attachments = (json['attachments'] as List? ?? [])
+        .map((a) => Attachment.fromMap(a!.cast<String, Object>()))
+        .toList();
 
     List<AttributedBody> attributedBody = [];
     if (json["attributedBody"] != null) {
       if (json['attributedBody'] is Map) {
-        json['attributedBody'] = [json['attributedBody']!.cast<String, Object>()];
+        json['attributedBody'] = [
+          json['attributedBody']!.cast<String, Object>()
+        ];
       }
       try {
-        attributedBody = (json['attributedBody'] as List).map((a) => AttributedBody.fromMap(a!.cast<String, Object>())).toList();
+        attributedBody = (json['attributedBody'] as List)
+            .map((a) => AttributedBody.fromMap(a!.cast<String, Object>()))
+            .toList();
       } catch (e, stack) {
-        Logger.error('Failed to parse attributed body!', error: e, trace: stack);
+        Logger.error('Failed to parse attributed body!',
+            error: e, trace: stack);
       }
     }
 
@@ -529,14 +584,18 @@ class Message {
 
     List<MessageSummaryInfo> msi = [];
     try {
-      msi = (json['messageSummaryInfo'] as List? ?? []).map((e) => MessageSummaryInfo.fromJson(e!.cast<String, Object>())).toList();
+      msi = (json['messageSummaryInfo'] as List? ?? [])
+          .map((e) => MessageSummaryInfo.fromJson(e!.cast<String, Object>()))
+          .toList();
     } catch (e, stack) {
       Logger.error('Failed to parse summary info!', error: e, trace: stack);
     }
 
     PayloadData? payloadData;
     try {
-      payloadData = json['payloadData'] == null ? null : PayloadData.fromJson(json['payloadData']);
+      payloadData = json['payloadData'] == null
+          ? null
+          : PayloadData.fromJson(json['payloadData']);
     } catch (e, s) {
       Logger.error('Failed to parse payload data!', error: e, trace: s);
     }
@@ -562,13 +621,26 @@ class Message {
       groupTitle: json["groupTitle"],
       groupActionType: json["groupActionType"] ?? 0,
       balloonBundleId: json["balloonBundleId"],
-      associatedMessageGuid: json["associatedMessageGuid"]?.toString().replaceAll("bp:", "").split("/").last,
-      associatedMessagePart: json["associatedMessagePart"] ?? int.tryParse(json["associatedMessageGuid"].toString().replaceAll("p:", "").split("/").first),
+      associatedMessageGuid: json["associatedMessageGuid"]
+          ?.toString()
+          .replaceAll("bp:", "")
+          .split("/")
+          .last,
+      associatedMessagePart: json["associatedMessagePart"] ??
+          int.tryParse(json["associatedMessageGuid"]
+              .toString()
+              .replaceAll("p:", "")
+              .split("/")
+              .first),
       associatedMessageType: json["associatedMessageType"],
       expressiveSendStyleId: json["expressiveSendStyleId"],
-      handle: json['handle'] != null ? Handle.fromMap(json['handle']!.cast<String, Object>()) : null,
+      handle: json['handle'] != null
+          ? Handle.fromMap(json['handle']!.cast<String, Object>())
+          : null,
       hasAttachments: attachments.isNotEmpty || json['hasAttachments'] == true,
-      attachments: (json['attachments'] as List? ?? []).map((a) => Attachment.fromMap(a!.cast<String, Object>())).toList(),
+      attachments: (json['attachments'] as List? ?? [])
+          .map((a) => Attachment.fromMap(a!.cast<String, Object>()))
+          .toList(),
       hasReactions: json['hasReactions'] == true,
       dateDeleted: parseDate(json["dateDeleted"]),
       metadata: metadata is String ? null : metadata,
@@ -577,7 +649,8 @@ class Message {
       attributedBody: attributedBody,
       messageSummaryInfo: msi,
       payloadData: payloadData,
-      hasApplePayloadData: json['hasApplePayloadData'] == true || payloadData != null,
+      hasApplePayloadData:
+          json['hasApplePayloadData'] == true || payloadData != null,
       dateEdited: parseDate(json["dateEdited"]),
       wasDeliveredQuietly: json['wasDeliveredQuietly'] ?? false,
       didNotifyRecipient: json['didNotifyRecipient'] ?? false,
@@ -595,19 +668,26 @@ class Message {
 
   List<Tuple2<RegExp, String>> inferReactionMap = [
     Tuple2(RegExp(r'^\s*Liked “(.*)”\s*$'), ReactionTypes.LIKE),
-    Tuple2(RegExp(r'^\s*Removed a like from “(.*)”\s*$'), "-${ReactionTypes.LIKE}"),
+    Tuple2(RegExp(r'^\s*Removed a like from “(.*)”\s*$'),
+        "-${ReactionTypes.LIKE}"),
     Tuple2(RegExp(r'^\s*Loved “(.*)”\s*$'), ReactionTypes.LOVE),
-    Tuple2(RegExp(r'^\s*Removed a heart from “(.*)”\s*$'), "-${ReactionTypes.LOVE}"),
+    Tuple2(RegExp(r'^\s*Removed a heart from “(.*)”\s*$'),
+        "-${ReactionTypes.LOVE}"),
     Tuple2(RegExp(r'^\s*Disliked “(.*)”\s*$'), ReactionTypes.DISLIKE),
-    Tuple2(RegExp(r'^\s*Removed a dislike from “(.*)”\s*$'), "-${ReactionTypes.DISLIKE}"),
+    Tuple2(RegExp(r'^\s*Removed a dislike from “(.*)”\s*$'),
+        "-${ReactionTypes.DISLIKE}"),
     Tuple2(RegExp(r'^\s*Laughed at “(.*)”\s*$'), ReactionTypes.LAUGH),
-    Tuple2(RegExp(r'^\s*Removed a laugh from “(.*)”\s*$'), "-${ReactionTypes.LAUGH}"),
+    Tuple2(RegExp(r'^\s*Removed a laugh from “(.*)”\s*$'),
+        "-${ReactionTypes.LAUGH}"),
     Tuple2(RegExp(r'^\s*Emphasized “(.*)”\s*$'), ReactionTypes.EMPHASIZE),
-    Tuple2(RegExp(r'^\s*Removed an exclamation from “(.*)”\s*$'), "-${ReactionTypes.EMPHASIZE}"),
+    Tuple2(RegExp(r'^\s*Removed an exclamation from “(.*)”\s*$'),
+        "-${ReactionTypes.EMPHASIZE}"),
     Tuple2(RegExp(r'^\s*Questioned “(.*)”\s*$'), ReactionTypes.QUESTION),
-    Tuple2(RegExp(r'^\s*Removed a question mark from “(.*)”\s*$'), "-${ReactionTypes.QUESTION}"),
+    Tuple2(RegExp(r'^\s*Removed a question mark from “(.*)”\s*$'),
+        "-${ReactionTypes.QUESTION}"),
     Tuple2(RegExp(r'^\s*Reacted ([^\s]+) to “(.*)”\s*$'), ReactionTypes.EMOJI),
-    Tuple2(RegExp(r'^\s*Removed ([^\s]+) from “(.*)”\s*$'), "-${ReactionTypes.EMOJI}"),
+    Tuple2(RegExp(r'^\s*Removed ([^\s]+) from “(.*)”\s*$'),
+        "-${ReactionTypes.EMOJI}"),
   ];
 
   void inferReaction(Chat chat) {
@@ -615,13 +695,15 @@ class Message {
     for (var reaction in inferReactionMap) {
       var match = reaction.item1.firstMatch(text!);
       if (match == null) continue;
-      var query = (Database.messages.query(Message_.text.equals(match[match.groupCount > 1 ? 2 : 1]!).and(Message_.chat.equals(chat.id!)))
-        ..order(Message_.dateCreated, flags: Order.descending))
-        .build();
+      var query = (Database.messages.query(Message_.text
+              .equals(match[match.groupCount > 1 ? 2 : 1]!)
+              .and(Message_.chat.equals(chat.id!)))
+            ..order(Message_.dateCreated, flags: Order.descending))
+          .build();
       query.limit = 1;
       var msg = query.findFirst();
       query.close();
-    
+
       if (msg == null) return;
       associatedMessageGuid = msg.guid!;
       associatedMessagePart = 0;
@@ -639,9 +721,11 @@ class Message {
     body.runs.sort((a, b) => a.range.first.compareTo(b.range.first));
     body.runs.forEachIndexed((i, e) {
       if (e.attributes?.messagePart == null) return;
-      final existingPart = list.firstWhereOrNull((element) => element.part == e.attributes!.messagePart!);
+      final existingPart = list.firstWhereOrNull(
+          (element) => element.part == e.attributes!.messagePart!);
       if (existingPart != null) {
-        final newText = mainString.substring(e.range.first, e.range.first + e.range.last);
+        final newText =
+            mainString.substring(e.range.first, e.range.first + e.range.last);
         final currentLength = existingPart.text?.length ?? 0;
         existingPart.text = (existingPart.text ?? "") + newText;
         existingPart.annotations.add(Annotation(
@@ -653,30 +737,35 @@ class Message {
           strikethrough: e.attributes?.strikethrough,
           textEffect: e.attributes?.textEffect,
         ));
-        existingPart.annotations.sort((a, b) => a.range.first.compareTo(b.range.first));
+        existingPart.annotations
+            .sort((a, b) => a.range.first.compareTo(b.range.first));
       } else {
         list.add(MessagePart(
           subject: i == 0 ? subject : null,
-          text: e.isAttachment ? null : mainString.substring(e.range.first, e.range.first + e.range.last),
-          attachments: e.isAttachment && (chat.target != null || cm.activeChat != null)
-              ? [
-                  ms(chat.target?.guid ?? cm.activeChat!.chat.guid)
-                          .struct
-                          .getAttachment(e.attributes!.attachmentGuid!) ??
-                      Attachment.findOne(e.attributes!.attachmentGuid!)
-                ].where((e) => e != null).map((e) => e!).toList()
-              : [],
+          text: e.isAttachment
+              ? null
+              : mainString.substring(
+                  e.range.first, e.range.first + e.range.last),
+          attachments:
+              e.isAttachment && (chat.target != null || cm.activeChat != null)
+                  ? [
+                      ms(chat.target?.guid ?? cm.activeChat!.chat.guid)
+                              .struct
+                              .getAttachment(e.attributes!.attachmentGuid!) ??
+                          Attachment.findOne(e.attributes!.attachmentGuid!)
+                    ].where((e) => e != null).map((e) => e!).toList()
+                  : [],
           annotations: [
-                  Annotation(
-                    mentionedAddress: e.attributes?.mention,
-                    bold: e.attributes?.bold,
-                    italic: e.attributes?.italic,
-                    underline: e.attributes?.underline,
-                    strikethrough: e.attributes?.strikethrough,
-                    textEffect: e.attributes?.textEffect,
-                    range: [0, e.range.last],
-                  )
-                ],
+            Annotation(
+              mentionedAddress: e.attributes?.mention,
+              bold: e.attributes?.bold,
+              italic: e.attributes?.italic,
+              underline: e.attributes?.underline,
+              strikethrough: e.attributes?.strikethrough,
+              textEffect: e.attributes?.textEffect,
+              range: [0, e.range.last],
+            )
+          ],
           part: e.attributes!.messagePart!,
         ));
       }
@@ -696,12 +785,15 @@ class Message {
     // add edits
     if (messageSummaryInfo.firstOrNull?.editedParts.isNotEmpty ?? false) {
       for (int part in messageSummaryInfo.first.editedParts) {
-        final edits = messageSummaryInfo.first.editedContent[part.toString()] ?? [];
-        final existingPart = parts.firstWhereOrNull((element) => element.part == part);
+        final edits =
+            messageSummaryInfo.first.editedContent[part.toString()] ?? [];
+        final existingPart =
+            parts.firstWhereOrNull((element) => element.part == part);
         if (existingPart != null) {
           existingPart.edits.addAll(edits
               .where((e) => e.text?.values.isNotEmpty ?? false)
-              .map((e) => attributedBodyToMessagePart(e.text!.values.first).firstOrNull)
+              .map((e) =>
+                  attributedBodyToMessagePart(e.text!.values.first).firstOrNull)
               .where((e) => e != null)
               .map((e) => e!)
               .toList());
@@ -750,7 +842,10 @@ class Message {
 
   /// Save a single message - prefer [bulkSave] for multiple messages rather
   /// than iterating through them
-  Message save({Chat? chat, bool updateIsBookmarked = false, bool updateSendingServiceId = false}) {
+  Message save(
+      {Chat? chat,
+      bool updateIsBookmarked = false,
+      bool updateSendingServiceId = false}) {
     if (kIsWeb || temp) return this;
     Database.runInTransaction(TxMode.write, () {
       Message? existing = Message.findOne(guid: guid);
@@ -773,7 +868,8 @@ class Message {
       // Save associated messages or the original message (depending on whether
       // this message is a reaction or regular message
       if (associatedMessageType != null && associatedMessageGuid != null) {
-        Message? associatedMessage = Message.findOne(guid: associatedMessageGuid);
+        Message? associatedMessage =
+            Message.findOne(guid: associatedMessageGuid);
         if (associatedMessage != null) {
           associatedMessage.hasReactions = true;
           associatedMessage.save();
@@ -799,7 +895,8 @@ class Message {
     return this;
   }
 
-  static Future<List<Message>> bulkSaveNewMessages(Chat chat, List<Message> messages) async {
+  static Future<List<Message>> bulkSaveNewMessages(
+      Chat chat, List<Message> messages) async {
     if (kIsWeb) throw Exception("Web does not support saving messages!");
 
     final task = BulkSaveNewMessages([chat, messages]);
@@ -811,9 +908,11 @@ class Message {
     Database.runInTransaction(TxMode.write, () {
       /// Find existing messages and match them to the messages to save, where
       /// possible
-      List<Message> existingMessages = Message.find(cond: Message_.guid.oneOf(messages.map((e) => e.guid!).toList()));
+      List<Message> existingMessages = Message.find(
+          cond: Message_.guid.oneOf(messages.map((e) => e.guid!).toList()));
       for (Message m in messages) {
-        final existingMessage = existingMessages.firstWhereOrNull((e) => e.guid == m.guid);
+        final existingMessage =
+            existingMessages.firstWhereOrNull((e) => e.guid == m.guid);
         if (existingMessage != null) {
           m.id = existingMessage.id;
           m.text ??= existingMessage.text;
@@ -829,34 +928,41 @@ class Message {
       }
 
       /// Find associated messages or original messages
-      List<Message> associatedMessages =
-          Message.find(cond: Message_.guid.oneOf(messages.map((e) => e.associatedMessageGuid ?? "").toList()));
-      List<Message> originalMessages =
-          Message.find(cond: Message_.associatedMessageGuid.oneOf(messages.map((e) => e.guid!).toList()));
+      List<Message> associatedMessages = Message.find(
+          cond: Message_.guid.oneOf(
+              messages.map((e) => e.associatedMessageGuid ?? "").toList()));
+      List<Message> originalMessages = Message.find(
+          cond: Message_.associatedMessageGuid
+              .oneOf(messages.map((e) => e.guid!).toList()));
 
       /// Iterate thru messages and update the associated message or the original
       /// message, and update original message handle data
       for (Message m in messages) {
-        if (m.associatedMessageType != null && m.associatedMessageGuid != null) {
-          final associatedMessageList = associatedMessages.where((e) => e.guid == m.associatedMessageGuid);
+        if (m.associatedMessageType != null &&
+            m.associatedMessageGuid != null) {
+          final associatedMessageList = associatedMessages
+              .where((e) => e.guid == m.associatedMessageGuid);
           for (Message am in associatedMessageList) {
             am.hasReactions = true;
           }
         } else if (!m.hasReactions) {
-          final originalMessage = originalMessages.firstWhereOrNull((e) => e.associatedMessageGuid == m.guid);
+          final originalMessage = originalMessages
+              .firstWhereOrNull((e) => e.associatedMessageGuid == m.guid);
           if (originalMessage != null) {
             m.hasReactions = true;
           }
         }
       }
       associatedMessages.removeWhere((message) {
-        Message? _message = messages.firstWhereOrNull((e) => e.guid == message.guid);
+        Message? _message =
+            messages.firstWhereOrNull((e) => e.guid == message.guid);
         _message?.hasReactions = message.hasReactions;
         return _message != null;
       });
       try {
         /// Update the original messages and associated messages
-        final ids = Database.messages.putMany(messages..addAll(associatedMessages));
+        final ids =
+            Database.messages.putMany(messages..addAll(associatedMessages));
         for (int i = 0; i < messages.length; i++) {
           messages[i].id = ids[i];
         }
@@ -866,7 +972,8 @@ class Message {
   }
 
   /// Replace a temp message with the message from the server
-  static Future<Message> replaceMessage(String? oldGuid, Message newMessage) async {
+  static Future<Message> replaceMessage(
+      String? oldGuid, Message newMessage) async {
     if (newMessage.temp) throw Exception("Attempting to persist temp message!");
     Message? existing = Message.findOne(guid: oldGuid);
     if (existing == null) {
@@ -880,16 +987,27 @@ class Message {
     if (newMessage.text != null) {
       existing.text = newMessage.text;
     }
-    
-    existing._dateDelivered.value = newMessage._dateDelivered.value ?? existing._dateDelivered.value;
+
+    existing._dateDelivered.value =
+        newMessage._dateDelivered.value ?? existing._dateDelivered.value;
     existing._isDelivered.value = newMessage._isDelivered.value;
-    existing._dateRead.value = newMessage._dateRead.value ?? existing._dateRead.value;
-    existing._dateEdited.value = newMessage._dateEdited.value ?? existing._dateEdited.value;
-    existing.attributedBody = newMessage.attributedBody.isNotEmpty ? newMessage.attributedBody : existing.attributedBody;
-    existing.messageSummaryInfo = newMessage.messageSummaryInfo.isNotEmpty ? newMessage.messageSummaryInfo : existing.messageSummaryInfo;
+    existing._dateRead.value =
+        newMessage._dateRead.value ?? existing._dateRead.value;
+    existing._dateEdited.value =
+        newMessage._dateEdited.value ?? existing._dateEdited.value;
+    existing.attributedBody = newMessage.attributedBody.isNotEmpty
+        ? newMessage.attributedBody
+        : existing.attributedBody;
+    existing.messageSummaryInfo = newMessage.messageSummaryInfo.isNotEmpty
+        ? newMessage.messageSummaryInfo
+        : existing.messageSummaryInfo;
     existing.payloadData = newMessage.payloadData ?? existing.payloadData;
-    existing.wasDeliveredQuietly = newMessage.wasDeliveredQuietly ? newMessage.wasDeliveredQuietly : existing.wasDeliveredQuietly;
-    existing.didNotifyRecipient = newMessage.didNotifyRecipient ? newMessage.didNotifyRecipient : existing.didNotifyRecipient;
+    existing.wasDeliveredQuietly = newMessage.wasDeliveredQuietly
+        ? newMessage.wasDeliveredQuietly
+        : existing.wasDeliveredQuietly;
+    existing.didNotifyRecipient = newMessage.didNotifyRecipient
+        ? newMessage.didNotifyRecipient
+        : existing.didNotifyRecipient;
     existing._error.value = newMessage._error.value;
     existing.stagingGuid = newMessage.stagingGuid;
     existing.verificationFailed = newMessage.verificationFailed;
@@ -902,7 +1020,10 @@ class Message {
     try {
       Database.messages.put(existing, mode: PutMode.update);
     } catch (ex, stack) {
-      Logger.error('Failed to replace message! This is likely due to a unique constraint being violated.', error: ex, trace: stack);
+      Logger.error(
+          'Failed to replace message! This is likely due to a unique constraint being violated.',
+          error: ex,
+          trace: stack);
     }
     return existing;
   }
@@ -955,31 +1076,72 @@ class Message {
     return "at_${items[1]}_${items[0]}";
   }
 
-  Uint8List? encodeAttributedBody(List<AttributedBody> body, bool noAttachments) {
+  Uint8List? encodeAttributedBody(
+      List<AttributedBody> body, bool noAttachments) {
     if (body.isEmpty) return null;
-    return api.nscoderEncode(value: body.map((b) => api.NSAttributedString(
-      text: b.string,
-      ranges: b.runs.filter((run) => !noAttachments || run.attributes?.attachmentGuid == null).map((run) => (run.range[1], api.NSDictionaryTypedCoder(field0: {
-        if (run.attributes?.messagePart != null)
-        "__kIMMessagePartAttributeName": api.NSNumber(field0: run.attributes!.messagePart!).encode(),
-        if (run.attributes?.attachmentGuid != null)
-        "__kIMFileTransferGUIDAttributeName": api.NSString(field0: unconvertAttachmentGuid(run.attributes!.attachmentGuid!)).encode(),
-        if (run.attributes?.mention != null)
-        "__kIMMentionConfirmedMention": api.NSString(field0: run.attributes!.mention!).encode(),
-        if (run.attributes?.audioTranscript != null)
-        "IMAudioTranscription": api.NSString(field0: run.attributes!.audioTranscript!).encode(),
-        if (run.attributes?.textEffect != null)
-        "__kIMTextEffectAttributeName": api.NSNumber(field0: run.attributes!.textEffect!).encode(),
-        if (run.attributes?.bold != null)
-        "__kIMTextBoldAttributeName": api.NSNumber(field0: run.attributes!.bold! ? 1 : 0).encode(),
-        if (run.attributes?.italic != null)
-        "__kIMTextItalicAttributeName": api.NSNumber(field0: run.attributes!.italic! ? 1 : 0).encode(),
-        if (run.attributes?.italic != null)
-        "__kIMTextStrikethroughAttributeName": api.NSNumber(field0: run.attributes!.italic! ? 1 : 0).encode(),
-        if (run.attributes?.underline != null)
-        "__kIMTextUnderlineAttributeName": api.NSNumber(field0: run.attributes!.underline! ? 1 : 0).encode(),
-      }))).toList()
-    ).encode()).toList());
+    return api.nscoderEncode(
+        value: body
+            .map((b) => api.NSAttributedString(
+                    text: b.string,
+                    ranges: b.runs
+                        .filter((run) =>
+                            !noAttachments ||
+                            run.attributes?.attachmentGuid == null)
+                        .map((run) => (
+                              run.range[1],
+                              api.NSDictionaryTypedCoder(field0: {
+                                if (run.attributes?.messagePart != null)
+                                  "__kIMMessagePartAttributeName": api.NSNumber(
+                                          field0: run.attributes!.messagePart!)
+                                      .encode(),
+                                if (run.attributes?.attachmentGuid != null)
+                                  "__kIMFileTransferGUIDAttributeName":
+                                      api.NSString(
+                                              field0: unconvertAttachmentGuid(
+                                                  run.attributes!
+                                                      .attachmentGuid!))
+                                          .encode(),
+                                if (run.attributes?.mention != null)
+                                  "__kIMMentionConfirmedMention": api.NSString(
+                                          field0: run.attributes!.mention!)
+                                      .encode(),
+                                if (run.attributes?.audioTranscript != null)
+                                  "IMAudioTranscription": api.NSString(
+                                          field0:
+                                              run.attributes!.audioTranscript!)
+                                      .encode(),
+                                if (run.attributes?.textEffect != null)
+                                  "__kIMTextEffectAttributeName": api.NSNumber(
+                                          field0: run.attributes!.textEffect!)
+                                      .encode(),
+                                if (run.attributes?.bold != null)
+                                  "__kIMTextBoldAttributeName": api.NSNumber(
+                                          field0: run.attributes!.bold! ? 1 : 0)
+                                      .encode(),
+                                if (run.attributes?.italic != null)
+                                  "__kIMTextItalicAttributeName": api.NSNumber(
+                                          field0:
+                                              run.attributes!.italic! ? 1 : 0)
+                                      .encode(),
+                                if (run.attributes?.italic != null)
+                                  "__kIMTextStrikethroughAttributeName":
+                                      api.NSNumber(
+                                              field0: run.attributes!.italic!
+                                                  ? 1
+                                                  : 0)
+                                          .encode(),
+                                if (run.attributes?.underline != null)
+                                  "__kIMTextUnderlineAttributeName":
+                                      api.NSNumber(
+                                              field0: run.attributes!.underline!
+                                                  ? 1
+                                                  : 0)
+                                          .encode(),
+                              })
+                            ))
+                        .toList())
+                .encode())
+            .toList());
   }
 
   List<AttributedBody> decodeAttributedBody(Uint8List? data) {
@@ -988,26 +1150,76 @@ class Message {
       var decoded = api.NSAttributedString.decode(val: val);
       int length = 0;
       return AttributedBody(
-        string: decoded.text,
-        runs: decoded.ranges.map((r) {
-          var start = length;
-          length += r.$1;
-          return Run(
-            range: [start, r.$1],
-            attributes: Attributes(
-              messagePart: r.$2.field0["__kIMMessagePartAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMMessagePartAttributeName"]!).field0,
-              attachmentGuid: r.$2.field0["__kIMFileTransferGUIDAttributeName"] == null ? null : convertAttachmentGuid(api.NSString.decode(val: r.$2.field0["__kIMFileTransferGUIDAttributeName"]!).field0),
-              mention: r.$2.field0["__kIMMentionConfirmedMention"] == null ? null : api.NSString.decode(val: r.$2.field0["__kIMMentionConfirmedMention"]!).field0,
-              audioTranscript: r.$2.field0["IMAudioTranscription"] == null ? null : api.NSString.decode(val: r.$2.field0["IMAudioTranscription"]!).field0,
-              textEffect: r.$2.field0["__kIMTextEffectAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMTextEffectAttributeName"]!).field0,
-              bold: r.$2.field0["__kIMTextBoldAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMTextBoldAttributeName"]!).field0 == 1,
-              italic: r.$2.field0["__kIMTextItalicAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMTextItalicAttributeName"]!).field0 == 1,
-              strikethrough: r.$2.field0["__kIMTextStrikethroughAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMTextStrikethroughAttributeName"]!).field0 == 1,
-              underline: r.$2.field0["__kIMTextUnderlineAttributeName"] == null ? null : api.NSNumber.decode(val: r.$2.field0["__kIMTextUnderlineAttributeName"]!).field0 == 1,
-            )
-          );
-        }).toList()
-      );
+          string: decoded.text,
+          runs: decoded.ranges.map((r) {
+            var start = length;
+            length += r.$1;
+            return Run(
+                range: [start, r.$1],
+                attributes: Attributes(
+                  messagePart: r.$2.field0["__kIMMessagePartAttributeName"] ==
+                          null
+                      ? null
+                      : api.NSNumber.decode(
+                              val:
+                                  r.$2.field0["__kIMMessagePartAttributeName"]!)
+                          .field0,
+                  attachmentGuid:
+                      r.$2.field0["__kIMFileTransferGUIDAttributeName"] == null
+                          ? null
+                          : convertAttachmentGuid(api.NSString.decode(
+                                  val: r.$2.field0[
+                                      "__kIMFileTransferGUIDAttributeName"]!)
+                              .field0),
+                  mention: r.$2.field0["__kIMMentionConfirmedMention"] == null
+                      ? null
+                      : api.NSString.decode(
+                              val: r.$2.field0["__kIMMentionConfirmedMention"]!)
+                          .field0,
+                  audioTranscript: r.$2.field0["IMAudioTranscription"] == null
+                      ? null
+                      : api.NSString.decode(
+                              val: r.$2.field0["IMAudioTranscription"]!)
+                          .field0,
+                  textEffect: r.$2.field0["__kIMTextEffectAttributeName"] ==
+                          null
+                      ? null
+                      : api.NSNumber.decode(
+                              val: r.$2.field0["__kIMTextEffectAttributeName"]!)
+                          .field0,
+                  bold: r.$2.field0["__kIMTextBoldAttributeName"] == null
+                      ? null
+                      : api.NSNumber.decode(
+                                  val: r
+                                      .$2.field0["__kIMTextBoldAttributeName"]!)
+                              .field0 ==
+                          1,
+                  italic: r.$2.field0["__kIMTextItalicAttributeName"] == null
+                      ? null
+                      : api.NSNumber.decode(
+                                  val: r.$2
+                                      .field0["__kIMTextItalicAttributeName"]!)
+                              .field0 ==
+                          1,
+                  strikethrough: r.$2
+                              .field0["__kIMTextStrikethroughAttributeName"] ==
+                          null
+                      ? null
+                      : api.NSNumber.decode(
+                                  val: r.$2.field0[
+                                      "__kIMTextStrikethroughAttributeName"]!)
+                              .field0 ==
+                          1,
+                  underline:
+                      r.$2.field0["__kIMTextUnderlineAttributeName"] == null
+                          ? null
+                          : api.NSNumber.decode(
+                                      val: r.$2.field0[
+                                          "__kIMTextUnderlineAttributeName"]!)
+                                  .field0 ==
+                              1,
+                ));
+          }).toList());
     }).toList();
   }
 
@@ -1026,89 +1238,124 @@ class Message {
       attributedBody = [AttributedBody.raw(" ")];
     }
 
-    if (noAttachments && attributedBody.isNotEmpty && attributedBody[0].runs.every((run) => run.attributes?.attachmentGuid != null)) {
+    if (noAttachments &&
+        attributedBody.isNotEmpty &&
+        attributedBody[0]
+            .runs
+            .every((run) => run.attributes?.attachmentGuid != null)) {
       throw Exception("No Attachments!");
     }
 
-    var p = payloadData?.appData?.firstOrNull != null ? api.encodeExtensionApp(app: pushService.dataToApp(payloadData!)).$2 : null;
+    var p = payloadData?.appData?.firstOrNull != null
+        ? api.encodeExtensionApp(app: pushService.dataToApp(payloadData!)).$2
+        : null;
     return api.CloudMessage(
-      utm: api.utmNow(),
-      type: associatedMessageGuid != null ? 2 : 1,
-      error: error, 
-      chatId: chat.target!.isGroup ? chat.target!.cloudGuid ?? chat.target!.guid : "iMessage;-;${chat.target!.chatIdentifier}", 
-      sender: isFromMe == true ? "" : getHandle()?.address ?? "", 
-      time: RustPushBBUtils.nsSinceAppleEpoch(dateCreated!), 
-      msgProto2: threadOriginatorGuid != null ? api.encodeMessageproto2(messageproto2: api.MessageProto2(
-        reply: "r:$threadOriginatorPart:$threadOriginatorGuid"
-      )) : null,
-      // this assumes it was sent with this handle, but, cmon, just go along with me...
-      destinationCallerId: chat.target!.usingHandle!.replaceFirst("mailto:", "").replaceFirst("tel:", ""), 
-      msgProto: api.encodeMessageproto(messageproto: api.MessageProto(
-        unk1: 1,
-        subject: subject, 
-        text: attributedBody[0].string, 
-        attributedBody: encodeAttributedBody(attributedBody, noAttachments),
-        balloonBundleId: balloonBundleId,
-        payloadData: p != null ? Uint8List.fromList(gzip.decode(p)) : null,
-        messageSummaryInfo: messageSummaryInfo.isEmpty ? null : api.encodeMessageInfo(info: api.MessageSummaryInfo(
-          ec: messageSummaryInfo.first.editedContent.map((key, value) => 
-            MapEntry(key, value.map((i) => api.MessageEdit(
-              t: encodeAttributedBody(i.text!.values, noAttachments)!, 
-              d: i.date!,
-            )).toList())), 
-          ep: Uint32List.fromList(messageSummaryInfo.first.editedParts), 
-          otr: messageSummaryInfo.first.originalTextRange.map((key, value) => MapEntry(key, api.MessageEditRange(lo: value[0], le: value[1]))), 
-          rp: Uint32List.fromList(messageSummaryInfo.first.retractedParts), 
-          euh: [],
-          amc: 0,
-          ust: true,
-        )),
-        effect: expressiveSendStyleId,
-        dateRead: dateRead != null ? RustPushBBUtils.nsSinceAppleEpoch(dateRead!) : 0,
-        unk10: 0,
-        unk11: 0,
-        dateDelivered: dateDelivered != null ? RustPushBBUtils.nsSinceAppleEpoch(dateDelivered!) : 0,
-        unk14: 0,
-        associatedMessageType: amt,
-        associatedMessageGuid: associatedMessageGuid != null ? "p:$associatedMessagePart/$associatedMessageGuid" : null,
-        associatedMessageRangeLength: associatedMessagePart != null ? Message.findOne(guid: associatedMessageGuid!)?.attributedBody[0].runs.firstWhere((r) => r.attributes!.messagePart == associatedMessagePart).range[1] : null,
-        associatedMessageRangeLocation: associatedMessagePart != null ? Message.findOne(guid: associatedMessageGuid!)?.attributedBody[0].runs.firstWhere((r) => r.attributes!.messagePart == associatedMessagePart).range[0] : null
-      )),
-      flags: api.MessageFlags.fromBitsTruncate(val: 
-        IS_FINISHED |
-        ((isFromMe ?? false) ? IS_FROM_ME : 0) |
-        (isDelivered ? IS_DELIVERED : 0) |
-        (dateRead != null ? IS_READ : 0) |
-        IS_SENT | 
-        (hasBeenForwarded ? IS_FORWARD : 0) |
-        WAS_DATA_DETECTED
-      ), 
-      guid: guid!, 
-      msgProto3: api.encodeMessageproto3(messageproto3: const api.MessageProto3(unk2: 0, unk3: 0)),
-      service: chat.target!.isRpSms ? "SMS" : "iMessage",
-      msgProto4: api.encodeMessageproto4(messageproto4: api.MessageProto4(
-        associatedMessageEmoji: associatedMessageEmoji,
-        service: chat.target!.isRpSms ? "SMS" : "iMessage", 
-        scheduleType: 0, 
-        scheduleState: 0, 
-        groupId: chat.target!.guid, 
-        sentOrReceivedOffGrid: 0
-      ))
-    );
+        utm: api.utmNow(),
+        type: associatedMessageGuid != null ? 2 : 1,
+        error: error,
+        chatId: chat.target!.isGroup
+            ? chat.target!.cloudGuid ?? chat.target!.guid
+            : "iMessage;-;${chat.target!.chatIdentifier}",
+        sender: isFromMe == true ? "" : getHandle()?.address ?? "",
+        time: RustPushBBUtils.nsSinceAppleEpoch(dateCreated!),
+        msgProto2: threadOriginatorGuid != null
+            ? api.encodeMessageproto2(
+                messageproto2: api.MessageProto2(
+                    reply: "r:$threadOriginatorPart:$threadOriginatorGuid"))
+            : null,
+        // this assumes it was sent with this handle, but, cmon, just go along with me...
+        destinationCallerId: chat.target!.usingHandle!
+            .replaceFirst("mailto:", "")
+            .replaceFirst("tel:", ""),
+        msgProto: api.encodeMessageproto(
+            messageproto: api.MessageProto(
+                unk1: 1,
+                subject: subject,
+                text: attributedBody[0].string,
+                attributedBody:
+                    encodeAttributedBody(attributedBody, noAttachments),
+                balloonBundleId: balloonBundleId,
+                payloadData:
+                    p != null ? Uint8List.fromList(gzip.decode(p)) : null,
+                messageSummaryInfo: messageSummaryInfo.isEmpty
+                    ? null
+                    : api.encodeMessageInfo(
+                        info: api.MessageSummaryInfo(
+                        ec: messageSummaryInfo.first.editedContent
+                            .map((key, value) => MapEntry(
+                                key,
+                                value
+                                    .map((i) => api.MessageEdit(
+                                          t: encodeAttributedBody(
+                                              i.text!.values, noAttachments)!,
+                                          d: i.date!,
+                                        ))
+                                    .toList())),
+                        ep: Uint32List.fromList(
+                            messageSummaryInfo.first.editedParts),
+                        otr: messageSummaryInfo.first.originalTextRange.map(
+                            (key, value) => MapEntry(
+                                key,
+                                api.MessageEditRange(
+                                    lo: value[0], le: value[1]))),
+                        rp: Uint32List.fromList(
+                            messageSummaryInfo.first.retractedParts),
+                        euh: [],
+                        amc: 0,
+                        ust: true,
+                      )),
+                effect: expressiveSendStyleId,
+                dateRead: dateRead != null
+                    ? RustPushBBUtils.nsSinceAppleEpoch(dateRead!)
+                    : 0,
+                unk10: 0,
+                unk11: 0,
+                dateDelivered: dateDelivered != null
+                    ? RustPushBBUtils.nsSinceAppleEpoch(dateDelivered!)
+                    : 0,
+                unk14: 0,
+                associatedMessageType: amt,
+                associatedMessageGuid: associatedMessageGuid != null
+                    ? "p:$associatedMessagePart/$associatedMessageGuid"
+                    : null,
+                associatedMessageRangeLength: associatedMessagePart != null
+                    ? Message.findOne(guid: associatedMessageGuid!)
+                        ?.attributedBody[0]
+                        .runs
+                        .firstWhere((r) =>
+                            r.attributes!.messagePart == associatedMessagePart)
+                        .range[1]
+                    : null,
+                associatedMessageRangeLocation: associatedMessagePart != null
+                    ? Message.findOne(guid: associatedMessageGuid!)
+                        ?.attributedBody[0]
+                        .runs
+                        .firstWhere((r) =>
+                            r.attributes!.messagePart == associatedMessagePart)
+                        .range[0]
+                    : null)),
+        flags: api.MessageFlags.fromBitsTruncate(val: IS_FINISHED | ((isFromMe ?? false) ? IS_FROM_ME : 0) | (isDelivered ? IS_DELIVERED : 0) | (dateRead != null ? IS_READ : 0) | IS_SENT | (hasBeenForwarded ? IS_FORWARD : 0) | WAS_DATA_DETECTED),
+        guid: guid!,
+        msgProto3: api.encodeMessageproto3(messageproto3: const api.MessageProto3(unk2: 0, unk3: 0)),
+        service: chat.target!.isRpSms ? "SMS" : "iMessage",
+        msgProto4: api.encodeMessageproto4(messageproto4: api.MessageProto4(associatedMessageEmoji: associatedMessageEmoji, service: chat.target!.isRpSms ? "SMS" : "iMessage", scheduleType: 0, scheduleState: 0, groupId: chat.target!.guid, sentOrReceivedOffGrid: 0)));
   }
 
   void applyFromCloud(api.CloudMessage c, String cloudkitId) {
     Logger.info("item ${c.chatId}");
     Chat? chat;
     if (c.chatId.contains(";")) {
-      final query = Database.chats.query(Chat_.chatIdentifier.equals(c.chatId.split(";")[2])).build();
+      final query = Database.chats
+          .query(Chat_.chatIdentifier.equals(c.chatId.split(";")[2]))
+          .build();
       chat = query.findFirst();
       query.close();
     } else {
-      final query = Database.chats.query(Chat_.cloudGuid.equals(c.chatId)).build();
+      final query =
+          Database.chats.query(Chat_.cloudGuid.equals(c.chatId)).build();
       chat = query.findFirst();
       query.close();
-      
+
       chat ??= Chat.findByRustGuid(c.chatId);
     }
 
@@ -1126,46 +1373,78 @@ class Message {
     subject = proto1.subject;
     text = proto1.text;
     attributedBody = decodeAttributedBody(proto1.attributedBody);
-    hasAttachments = attributedBody.firstOrNull?.runs.any((run) => run.attributes?.attachmentGuid != null) ?? false;
+    hasAttachments = attributedBody.firstOrNull?.runs
+            .any((run) => run.attributes?.attachmentGuid != null) ??
+        false;
     // urls are a whole weird system, ignore for now.
-    var eraseBalloonBundle = proto1.balloonBundleId == "com.apple.messages.URLBalloonProvider";
+    var eraseBalloonBundle =
+        proto1.balloonBundleId == "com.apple.messages.URLBalloonProvider";
     balloonBundleId = proto1.balloonBundleId;
     if (eraseBalloonBundle) {
       balloonBundleId = null; // we don't support this at the moment.
     }
-    
+
     try {
-      payloadData = proto1.payloadData != null && !eraseBalloonBundle ? pushService.appToData(api.decodeExtensionApp(bp: gzip.encode(proto1.payloadData!), bid: proto1.balloonBundleId!)) : null;
+      payloadData = proto1.payloadData != null && !eraseBalloonBundle
+          ? pushService.appToData(api.decodeExtensionApp(
+              bp: gzip.encode(proto1.payloadData!),
+              bid: proto1.balloonBundleId!))
+          : null;
     } catch (e, s) {
-      Logger.info("Failed item ${hex.encode(proto1.payloadData!)} ${proto1.balloonBundleId}", error: e, trace: s);
+      Logger.info(
+          "Failed item ${hex.encode(proto1.payloadData!)} ${proto1.balloonBundleId}",
+          error: e,
+          trace: s);
     }
     hasApplePayloadData = proto1.payloadData != null && !eraseBalloonBundle;
 
     if (proto1.messageSummaryInfo != null) {
       var summary = api.decodeMessageInfo(data: proto1.messageSummaryInfo!);
-      messageSummaryInfo = [MessageSummaryInfo(
-        retractedParts: summary.rp.toList(), 
-        editedContent: summary.ec.map((key, value) => MapEntry(key, value.map((i) => EditedContent(text: Content(values: decodeAttributedBody(i.t)), date: i.d)).toList())), 
-        originalTextRange: summary.otr.map((key, value) => MapEntry(key, [value.lo, value.le])), 
-        editedParts: summary.ep.toList(),
-      )];
+      messageSummaryInfo = [
+        MessageSummaryInfo(
+          retractedParts: summary.rp.toList(),
+          editedContent: summary.ec.map((key, value) => MapEntry(
+              key,
+              value
+                  .map((i) => EditedContent(
+                      text: Content(values: decodeAttributedBody(i.t)),
+                      date: i.d))
+                  .toList())),
+          originalTextRange: summary.otr
+              .map((key, value) => MapEntry(key, [value.lo, value.le])),
+          editedParts: summary.ep.toList(),
+        )
+      ];
     } else {
       messageSummaryInfo = [];
     }
     expressiveSendStyleId = proto1.effect;
-    dateRead = proto1.dateRead == null || proto1.dateRead == 0 ? null : RustPushBBUtils.fromNsSinceAppleEpoch(proto1.dateRead!);
-    dateDelivered = proto1.dateDelivered == null || proto1.dateDelivered == 0 ? null : RustPushBBUtils.fromNsSinceAppleEpoch(proto1.dateDelivered!);
+    dateRead = proto1.dateRead == null || proto1.dateRead == 0
+        ? null
+        : RustPushBBUtils.fromNsSinceAppleEpoch(proto1.dateRead!);
+    dateDelivered = proto1.dateDelivered == null || proto1.dateDelivered == 0
+        ? null
+        : RustPushBBUtils.fromNsSinceAppleEpoch(proto1.dateDelivered!);
     if (proto1.associatedMessageType != null) {
       if (proto1.associatedMessageType == 2) {
         associatedMessageType = "sticker";
-      } else if (proto1.associatedMessageType! >= 2000 && proto1.associatedMessageType! < 3000) {
-        associatedMessageType = ReactionTypes.toList()[proto1.associatedMessageType! - 2000];
-      } else if (proto1.associatedMessageType! >= 3000 && proto1.associatedMessageType! < 4000) {
-        associatedMessageType = "-${ReactionTypes.toList()[proto1.associatedMessageType! - 3000]}";
+      } else if (proto1.associatedMessageType! >= 2000 &&
+          proto1.associatedMessageType! < 3000) {
+        associatedMessageType =
+            ReactionTypes.toList()[proto1.associatedMessageType! - 2000];
+      } else if (proto1.associatedMessageType! >= 3000 &&
+          proto1.associatedMessageType! < 4000) {
+        associatedMessageType =
+            "-${ReactionTypes.toList()[proto1.associatedMessageType! - 3000]}";
       }
     }
     associatedMessageGuid = proto1.associatedMessageGuid;
-    associatedMessagePart = attributedBody.firstOrNull?.runs.firstWhereOrNull((b) => b.range[0] == proto1.associatedMessageRangeLocation && b.range[1] == proto1.associatedMessageRangeLength)?.attributes?.messagePart;
+    associatedMessagePart = attributedBody.firstOrNull?.runs
+        .firstWhereOrNull((b) =>
+            b.range[0] == proto1.associatedMessageRangeLocation &&
+            b.range[1] == proto1.associatedMessageRangeLength)
+        ?.attributes
+        ?.messagePart;
     guid = c.guid;
     var bits = c.flags.bits();
     isFromMe = (bits & IS_FROM_ME) != 0;
@@ -1178,27 +1457,36 @@ class Message {
         threadOriginatorPart = parts.slice(1, parts.length - 1).join(":");
       }
     }
-    
+
     if (c.msgProto4 != null) {
       var proto4 = api.decodeMessageproto4(wrapped: c.msgProto4!);
       associatedMessageEmoji = proto4.associatedMessageEmoji;
     }
-    
+
     save(chat: chat);
   }
 
   /// Fetch reactions
-  Message fetchAssociatedMessages({MessagesService? service, bool shouldRefresh = false}) {
-    associatedMessages = Message.find(cond: Message_.associatedMessageGuid.equals(guid ?? ""));
-    associatedMessages = MessageHelper.normalizedAssociatedMessages(associatedMessages);
+  Message fetchAssociatedMessages(
+      {MessagesService? service, bool shouldRefresh = false}) {
+    associatedMessages =
+        Message.find(cond: Message_.associatedMessageGuid.equals(guid ?? ""));
+    associatedMessages =
+        MessageHelper.normalizedAssociatedMessages(associatedMessages);
     if (threadOriginatorGuid != null) {
       final existing = service?.struct.getMessage(threadOriginatorGuid!);
-      final threadOriginator = existing ?? Message.findOne(guid: threadOriginatorGuid);
+      final threadOriginator =
+          existing ?? Message.findOne(guid: threadOriginatorGuid);
       threadOriginator?.handle ??= threadOriginator.getHandle();
       if (threadOriginator != null) associatedMessages.add(threadOriginator);
-      if (existing == null && threadOriginator != null) service?.struct.addThreadOriginator(threadOriginator);
+      if (existing == null && threadOriginator != null) {
+        service?.struct.addThreadOriginator(threadOriginator);
+      }
     }
-    associatedMessages.sort((a, b) => a.originalROWID == null || b.originalROWID == null ? 0 : a.originalROWID!.compareTo(b.originalROWID!));
+    associatedMessages.sort((a, b) =>
+        a.originalROWID == null || b.originalROWID == null
+            ? 0
+            : a.originalROWID!.compareTo(b.originalROWID!));
     return this;
   }
 
@@ -1216,7 +1504,8 @@ class Message {
       query.close();
       result?.handle = result.getHandle();
       if (result == null) {
-        final query = Database.messages.query(Message_.stagingGuid.equals(guid)).build();
+        final query =
+            Database.messages.query(Message_.stagingGuid.equals(guid)).build();
         query.limit = 1;
         final result = query.findFirst();
         query.close();
@@ -1225,7 +1514,9 @@ class Message {
       }
       return result;
     } else if (associatedMessageGuid != null) {
-      final query = Database.messages.query(Message_.associatedMessageGuid.equals(associatedMessageGuid)).build();
+      final query = Database.messages
+          .query(Message_.associatedMessageGuid.equals(associatedMessageGuid))
+          .build();
       query.limit = 1;
       final result = query.findFirst();
       query.close();
@@ -1262,7 +1553,9 @@ class Message {
   static void softDelete(String guid) async {
     if (kIsWeb) return;
     Message? toDelete = Message.findOne(guid: guid);
-    if (toDelete != null) await backend.moveToRecycleBin(toDelete.chat.target!, toDelete);
+    if (toDelete != null) {
+      await backend.moveToRecycleBin(toDelete.chat.target!, toDelete);
+    }
     toDelete?.dateDeleted = DateTime.now().toUtc();
     toDelete?.save();
   }
@@ -1276,7 +1569,9 @@ class Message {
     } else if (a.dateDelivered == null) {
       aDateToUse = a.dateCreated!;
     } else {
-      aDateToUse = a.dateCreated!.isBefore(a.dateDelivered!) ? a.dateCreated! : a.dateDelivered!;
+      aDateToUse = a.dateCreated!.isBefore(a.dateDelivered!)
+          ? a.dateCreated!
+          : a.dateDelivered!;
     }
 
     late DateTime bDateToUse;
@@ -1285,32 +1580,47 @@ class Message {
     } else if (b.dateDelivered == null) {
       bDateToUse = b.dateCreated!;
     } else {
-      bDateToUse = b.dateCreated!.isBefore(b.dateDelivered!) ? b.dateCreated! : b.dateDelivered!;
+      bDateToUse = b.dateCreated!.isBefore(b.dateDelivered!)
+          ? b.dateCreated!
+          : b.dateDelivered!;
     }
 
-    return descending ? bDateToUse.compareTo(aDateToUse) : aDateToUse.compareTo(bDateToUse);
+    return descending
+        ? bDateToUse.compareTo(aDateToUse)
+        : aDateToUse.compareTo(bDateToUse);
   }
 
-  String get fullText => sanitizeString([subject, text].where((e) => !isNullOrEmpty(e)).join("\n"));
+  String get fullText => sanitizeString(
+      [subject, text].where((e) => !isNullOrEmpty(e)).join("\n"));
 
   // first condition is for macOS < 11 and second condition is for macOS >= 11
-  bool get isLegacyUrlPreview => (balloonBundleId == "com.apple.messages.URLBalloonProvider" && hasDdResults!)
-      || ((hasDdResults! || isFromMe!) && (text ?? "").trim().isURL);
+  bool get isLegacyUrlPreview =>
+      (balloonBundleId == "com.apple.messages.URLBalloonProvider" &&
+          hasDdResults!) ||
+      ((hasDdResults! || isFromMe!) && (text ?? "").trim().isURL);
 
-  String? get url => text?.replaceAll("\n", " ").split(" ").firstWhereOrNull((String e) => e.hasUrl);
+  String? get url => text
+      ?.replaceAll("\n", " ")
+      .split(" ")
+      .firstWhereOrNull((String e) => e.hasUrl);
 
   bool get isInteractive => balloonBundleId != null && !isLegacyUrlPreview;
 
   String get interactiveText {
     String text = "";
 
-    if (payloadData?.urlData != null && payloadData!.urlData!.isNotEmpty && payloadData?.urlData?.first.url != null) {
-      return payloadData!.urlData!.first.url!; // do not show summary for Android's open link functionality
+    if (payloadData?.urlData != null &&
+        payloadData!.urlData!.isNotEmpty &&
+        payloadData?.urlData?.first.url != null) {
+      return payloadData!.urlData!.first
+          .url!; // do not show summary for Android's open link functionality
     }
 
-    final temp = balloonBundleIdMap[balloonBundleId?.split(":").first] ?? (balloonBundleId?.split(":").first ?? "Unknown");
+    final temp = balloonBundleIdMap[balloonBundleId?.split(":").first] ??
+        (balloonBundleId?.split(":").first ?? "Unknown");
     if (temp is Map) {
-      text = temp[balloonBundleId?.split(":").last] ?? ((balloonBundleId?.split(":").last ?? "Unknown"));
+      text = temp[balloonBundleId?.split(":").last] ??
+          ((balloonBundleId?.split(":").last ?? "Unknown"));
     } else {
       text = temp.toString();
     }
@@ -1318,11 +1628,16 @@ class Message {
   }
 
   String? get interactiveMediaPath {
-    final extension = balloonBundleId!.contains("com.apple.Digital") ? ".mov" : balloonBundleId!.contains("com.apple.Handwriting") ? ".png" : null;
+    final extension = balloonBundleId!.contains("com.apple.Digital")
+        ? ".mov"
+        : balloonBundleId!.contains("com.apple.Handwriting")
+            ? ".png"
+            : null;
     return "${fs.appDocDir.path}/messages/$guid/embedded-media/$balloonBundleId$extension";
   }
 
-  bool get isGroupEvent => groupTitle != null || (itemType ?? 0) > 0 || (groupActionType ?? 0) > 0;
+  bool get isGroupEvent =>
+      groupTitle != null || (itemType ?? 0) > 0 || (groupActionType ?? 0) > 0;
 
   String get groupEventText {
     String text = "Unknown group event";
@@ -1370,16 +1685,27 @@ class Message {
     return text;
   }
 
-  bool get isParticipantEvent => isGroupEvent && ((itemType == 1 && [0, 1].contains(groupActionType)) || [2, 3].contains(itemType));
+  bool get isParticipantEvent =>
+      isGroupEvent &&
+      ((itemType == 1 && [0, 1].contains(groupActionType)) ||
+          [2, 3].contains(itemType));
 
   bool get isBigEmoji => bigEmoji ?? MessageHelper.shouldShowBigEmoji(fullText);
 
-  List<Attachment> get realAttachments => attachments.where((e) => e != null && e.mimeType != null).cast<Attachment>().toList();
+  List<Attachment> get realAttachments => attachments
+      .where((e) => e != null && e.mimeType != null)
+      .cast<Attachment>()
+      .toList();
 
-  List<Attachment> get previewAttachments => attachments.where((e) => e != null && e.mimeType == null).cast<Attachment>().toList();
+  List<Attachment> get previewAttachments => attachments
+      .where((e) => e != null && e.mimeType == null)
+      .cast<Attachment>()
+      .toList();
 
-  List<Message> get reactions => associatedMessages.where((item) =>
-      ReactionTypes.toList().contains(item.associatedMessageType?.replaceAll("-", ""))).toList();
+  List<Message> get reactions => associatedMessages
+      .where((item) => ReactionTypes.toList()
+          .contains(item.associatedMessageType?.replaceAll("-", "")))
+      .toList();
 
   Indicator get indicatorToShow {
     if (!isFromMe!) return Indicator.NONE;
@@ -1391,7 +1717,8 @@ class Message {
     return Indicator.NONE;
   }
 
-  bool get hasAudioTranscript => attributedBody.any((i) => i.runs.any((e) => e.attributes?.audioTranscript != null));
+  bool get hasAudioTranscript => attributedBody
+      .any((i) => i.runs.any((e) => e.attributes?.audioTranscript != null));
 
   bool showTail(Message? newer) {
     // if there is no newer, or if the newer is a different sender
@@ -1401,7 +1728,10 @@ class Message {
   }
 
   bool sameSender(Message? other) {
-    return (isFromMe! && isFromMe == other?.isFromMe) || (!isFromMe! && !(other?.isFromMe ?? true) && handleId == other?.handleId);
+    return (isFromMe! && isFromMe == other?.isFromMe) ||
+        (!isFromMe! &&
+            !(other?.isFromMe ?? true) &&
+            handleId == other?.handleId);
   }
 
   void generateTempGuid() {
@@ -1420,7 +1750,9 @@ class Message {
 
   /// Get what shape the reply line should be
   LineType getLineType(Message? olderMessage, Message threadOriginator) {
-    if (olderMessage?.threadOriginatorGuid != threadOriginatorGuid) olderMessage = threadOriginator;
+    if (olderMessage?.threadOriginatorGuid != threadOriginatorGuid) {
+      olderMessage = threadOriginator;
+    }
     if (isFromMe! && (olderMessage?.isFromMe ?? false)) {
       return LineType.meToMe;
     } else if (!isFromMe! && (olderMessage?.isFromMe ?? false)) {
@@ -1433,14 +1765,20 @@ class Message {
   }
 
   /// Get whether the reply line from the message should connect to the message below
-  bool shouldConnectLower(Message? olderMessage, Message? newerMessage, Message threadOriginator) {
+  bool shouldConnectLower(
+      Message? olderMessage, Message? newerMessage, Message threadOriginator) {
     // if theres no newer message or it isn't part of the thread, don't connect
-    if (newerMessage == null || newerMessage.threadOriginatorGuid != threadOriginatorGuid) return false;
+    if (newerMessage == null ||
+        newerMessage.threadOriginatorGuid != threadOriginatorGuid) {
+      return false;
+    }
     // if the line is from me to other or from other to other, don't connect lower.
     // we only want lines ending at messages to me to connect downwards (this
     // helps simplify some things and prevent rendering mistakes)
     if (getLineType(olderMessage, threadOriginator) == LineType.meToOther ||
-        getLineType(olderMessage, threadOriginator) == LineType.otherToOther) return false;
+        getLineType(olderMessage, threadOriginator) == LineType.otherToOther) {
+      return false;
+    }
     // if the lower message isn't from me, then draw the connecting line
     // (if the message is from me, that message will draw a connecting line up
     // rather than this message drawing one downwards).
@@ -1448,11 +1786,14 @@ class Message {
   }
 
   String replyPart(int part) {
-    Run run = attributedBody[0].runs.firstWhere((run) => run.attributes?.messagePart == part);
+    Run run = attributedBody[0]
+        .runs
+        .firstWhere((run) => run.attributes?.messagePart == part);
     return "$part:${run.range[0]}:${run.range[1]}";
   }
 
-  int get normalizedThreadPart => threadOriginatorPart == null ? 0 : int.parse(threadOriginatorPart![0]);
+  int get normalizedThreadPart =>
+      threadOriginatorPart == null ? 0 : int.parse(threadOriginatorPart![0]);
 
   bool connectToUpper() => threadOriginatorGuid != null;
 
@@ -1465,9 +1806,13 @@ class Message {
     // OR
     // 1) It is the thread originator but the part is not the last part of the older message
     // 2) It is part of the thread but has multiple parts
-    return (olderMessage.guid != threadOriginatorGuid && (olderMessage.threadOriginatorGuid != threadOriginatorGuid || olderMessage.normalizedThreadPart != normalizedThreadPart))
-        || (olderMessage.guid == threadOriginatorGuid && normalizedThreadPart != olderPartCount - 1)
-        || (olderMessage.threadOriginatorGuid == threadOriginatorGuid && olderPartCount > 1);
+    return (olderMessage.guid != threadOriginatorGuid &&
+            (olderMessage.threadOriginatorGuid != threadOriginatorGuid ||
+                olderMessage.normalizedThreadPart != normalizedThreadPart)) ||
+        (olderMessage.guid == threadOriginatorGuid &&
+            normalizedThreadPart != olderPartCount - 1) ||
+        (olderMessage.threadOriginatorGuid == threadOriginatorGuid &&
+            olderPartCount > 1);
   }
 
   bool connectToLower(Message newerMessage) {
@@ -1487,7 +1832,8 @@ class Message {
     // to check that it isn't actually an outlined bubble representing the
     // thread originator), don't connect
     if (olderMessage == null ||
-        (olderMessage.threadOriginatorGuid != threadOriginatorGuid && !upperIsThreadOriginatorBubble(olderMessage))) {
+        (olderMessage.threadOriginatorGuid != threadOriginatorGuid &&
+            !upperIsThreadOriginatorBubble(olderMessage))) {
       return false;
     }
     // if the older message is the outlined bubble, or the originator is from
@@ -1497,7 +1843,9 @@ class Message {
     if (upperIsThreadOriginatorBubble(olderMessage) ||
         (!threadOriginator.isFromMe! && isFromMe!) ||
         getLineType(olderMessage, threadOriginator) == LineType.meToMe ||
-        getLineType(olderMessage, threadOriginator) == LineType.otherToMe) return true;
+        getLineType(olderMessage, threadOriginator) == LineType.otherToMe) {
+      return true;
+    }
     // if the upper message is from me, then draw the connecting line
     // (if the message is not from me, that message will draw a connecting line
     // down rather than this message drawing one upwards).
@@ -1513,37 +1861,47 @@ class Message {
   /// Calculate the size of the message bubble by calculating text size or
   /// attachment size
   Size getBubbleSize(BuildContext context,
-      {double? maxWidthOverride, double? minHeightOverride, String? textOverride}) {
+      {double? maxWidthOverride,
+      double? minHeightOverride,
+      String? textOverride}) {
     // cache this value because the calculation can be expensive
-    if (MessagesService.cachedBubbleSizes[guid!] != null) return MessagesService.cachedBubbleSizes[guid!]!;
+    if (MessagesService.cachedBubbleSizes[guid!] != null) {
+      return MessagesService.cachedBubbleSizes[guid!]!;
+    }
     // if attachment, then grab width / height
     if (fullText.isEmpty && (attachments).isNotEmpty) {
       return Size(
-          attachments
-              .map((e) => e!.width)
-              .fold(0, (p, e) => max(p, (e ?? ns.width(context) / 2).toDouble()) + 28),
-          attachments
-              .map((e) => e!.height)
-              .fold(0, (p, e) => max(p, (e ?? ns.width(context) / 2).toDouble())));
+          attachments.map((e) => e!.width).fold(0,
+              (p, e) => max(p, (e ?? ns.width(context) / 2).toDouble()) + 28),
+          attachments.map((e) => e!.height).fold(
+              0, (p, e) => max(p, (e ?? ns.width(context) / 2).toDouble())));
     }
     // initialize constraints for text rendering
     final fontSizeFactor = isBigEmoji ? bigEmojiScaleFactor : 1.0;
     final constraints = BoxConstraints(
-      maxWidth: maxWidthOverride ?? ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 30,
-      minHeight: minHeightOverride ?? Theme.of(context).textTheme.bodySmall!.fontSize! * fontSizeFactor,
+      maxWidth: maxWidthOverride ??
+          ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 30,
+      minHeight: minHeightOverride ??
+          Theme.of(context).textTheme.bodySmall!.fontSize! * fontSizeFactor,
     );
     final renderParagraph = RichText(
       text: TextSpan(
         text: textOverride ?? fullText,
-        style: context.theme.textTheme.bodySmall!.apply(color: Colors.white, fontSizeFactor: fontSizeFactor),
+        style: context.theme.textTheme.bodySmall!
+            .apply(color: Colors.white, fontSizeFactor: fontSizeFactor),
       ),
     ).createRenderObject(context);
     // get the text size
     Size size = renderParagraph.getDryLayout(constraints);
     // if the text is shorter than the full width, add 28 to account for the
     // container margins
-    if (size.height < context.theme.textTheme.bodySmall!.fontSize! * 2 * fontSizeFactor ||
-        (subject != null && size.height < context.theme.textTheme.bodySmall!.fontSize! * 3 * fontSizeFactor)) {
+    if (size.height <
+            context.theme.textTheme.bodySmall!.fontSize! * 2 * fontSizeFactor ||
+        (subject != null &&
+            size.height <
+                context.theme.textTheme.bodySmall!.fontSize! *
+                    3 *
+                    fontSizeFactor)) {
       size = Size(size.width + 28, size.height);
     }
     // if we have a URL preview, extend to the full width
@@ -1564,17 +1922,19 @@ class Message {
   static Message merge(Message existing, Message newMessage) {
     existing.id ??= newMessage.id;
     existing.guid ??= newMessage.guid;
-  
+
     // Update date created
     if ((existing.dateCreated == null && newMessage.dateCreated != null) ||
         (existing.dateCreated != null &&
             newMessage.dateCreated != null &&
-            existing.dateCreated!.millisecondsSinceEpoch < newMessage.dateCreated!.millisecondsSinceEpoch)) {
+            existing.dateCreated!.millisecondsSinceEpoch <
+                newMessage.dateCreated!.millisecondsSinceEpoch)) {
       existing.dateCreated = newMessage.dateCreated;
     }
 
     // Update date delivered
-    if ((existing._dateDelivered.value == null && newMessage._dateDelivered.value != null) ||
+    if ((existing._dateDelivered.value == null &&
+            newMessage._dateDelivered.value != null) ||
         (existing._dateDelivered.value != null &&
             newMessage.dateDelivered != null &&
             existing._dateDelivered.value!.millisecondsSinceEpoch <
@@ -1588,10 +1948,12 @@ class Message {
     }
 
     // Update date read
-    if ((existing._dateRead.value == null && newMessage._dateRead.value != null) ||
+    if ((existing._dateRead.value == null &&
+            newMessage._dateRead.value != null) ||
         (existing._dateRead.value != null &&
             newMessage._dateRead.value != null &&
-            existing._dateRead.value!.millisecondsSinceEpoch < newMessage._dateRead.value!.millisecondsSinceEpoch)) {
+            existing._dateRead.value!.millisecondsSinceEpoch <
+                newMessage._dateRead.value!.millisecondsSinceEpoch)) {
       existing._dateRead.value = newMessage.dateRead;
     }
 
@@ -1599,7 +1961,8 @@ class Message {
     if ((existing.datePlayed == null && newMessage.datePlayed != null) ||
         (existing.datePlayed != null &&
             newMessage.datePlayed != null &&
-            existing.datePlayed!.millisecondsSinceEpoch < newMessage.datePlayed!.millisecondsSinceEpoch)) {
+            existing.datePlayed!.millisecondsSinceEpoch <
+                newMessage.datePlayed!.millisecondsSinceEpoch)) {
       existing.datePlayed = newMessage.datePlayed;
     }
 
@@ -1607,7 +1970,8 @@ class Message {
     if ((existing.dateDeleted == null && newMessage.dateDeleted != null) ||
         (existing.dateDeleted != null &&
             newMessage.dateDeleted != null &&
-            existing.dateDeleted!.millisecondsSinceEpoch < newMessage.dateDeleted!.millisecondsSinceEpoch)) {
+            existing.dateDeleted!.millisecondsSinceEpoch <
+                newMessage.dateDeleted!.millisecondsSinceEpoch)) {
       existing.dateDeleted = newMessage.dateDeleted;
     }
 
@@ -1615,7 +1979,8 @@ class Message {
     if ((existing.dateEdited == null && newMessage.dateEdited != null) ||
         (existing.dateEdited != null &&
             newMessage.dateEdited != null &&
-            existing.dateEdited!.millisecondsSinceEpoch < newMessage.dateEdited!.millisecondsSinceEpoch)) {
+            existing.dateEdited!.millisecondsSinceEpoch <
+                newMessage.dateEdited!.millisecondsSinceEpoch)) {
       existing.dateEdited = newMessage.dateEdited;
       if (!isNullOrEmpty(newMessage.attributedBody)) {
         existing.attributedBody = newMessage.attributedBody;
@@ -1637,7 +2002,8 @@ class Message {
     }
 
     // Update metadata
-    existing.metadata = mergeTopLevelDicts(existing.metadata, newMessage.metadata);
+    existing.metadata =
+        mergeTopLevelDicts(existing.metadata, newMessage.metadata);
 
     // Update original ROWID
     if (existing.originalROWID == null && newMessage.originalROWID != null) {
@@ -1729,15 +2095,20 @@ class Message {
     // Once we verify that all aren't null, we can start comparing dates.
     // Compare the dates in the opposite order of what should be filled in last -> first
     if (dateEdited != null && other.dateEdited != null) {
-      return dateEdited!.millisecondsSinceEpoch > other.dateEdited!.millisecondsSinceEpoch;
+      return dateEdited!.millisecondsSinceEpoch >
+          other.dateEdited!.millisecondsSinceEpoch;
     } else if (datePlayed != null && other.datePlayed != null) {
-      return datePlayed!.millisecondsSinceEpoch > other.datePlayed!.millisecondsSinceEpoch;
+      return datePlayed!.millisecondsSinceEpoch >
+          other.datePlayed!.millisecondsSinceEpoch;
     } else if (dateRead != null && other.dateRead != null) {
-      return dateRead!.millisecondsSinceEpoch > other.dateRead!.millisecondsSinceEpoch;
+      return dateRead!.millisecondsSinceEpoch >
+          other.dateRead!.millisecondsSinceEpoch;
     } else if (dateDelivered != null && other.dateDelivered != null) {
-      return dateDelivered!.millisecondsSinceEpoch > other.dateDelivered!.millisecondsSinceEpoch;
+      return dateDelivered!.millisecondsSinceEpoch >
+          other.dateDelivered!.millisecondsSinceEpoch;
     } else if (dateCreated != null && other.dateCreated != null) {
-      return dateCreated!.millisecondsSinceEpoch > other.dateCreated!.millisecondsSinceEpoch;
+      return dateCreated!.millisecondsSinceEpoch >
+          other.dateCreated!.millisecondsSinceEpoch;
     }
 
     return false;
@@ -1756,7 +2127,7 @@ class Message {
       "_error": _error.value,
       "dateCreated": dateCreated?.millisecondsSinceEpoch,
       "dateRead": _dateRead.value?.millisecondsSinceEpoch,
-      "dateDelivered":  _dateDelivered.value?.millisecondsSinceEpoch,
+      "dateDelivered": _dateDelivered.value?.millisecondsSinceEpoch,
       "isDelivered": _isDelivered.value,
       "isFromMe": isFromMe!,
       "hasDdResults": hasDdResults!,
@@ -1794,7 +2165,8 @@ class Message {
       map['attachments'] = (attachments).map((e) => e!.toMap()).toList();
       map['handle'] = handle?.toMap();
       map['attributedBody'] = attributedBody.map((e) => e.toMap()).toList();
-      map['messageSummaryInfo'] = messageSummaryInfo.map((e) => e.toJson()).toList();
+      map['messageSummaryInfo'] =
+          messageSummaryInfo.map((e) => e.toJson()).toList();
       map['payloadData'] = payloadData?.toJson();
     }
     return map;

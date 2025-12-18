@@ -1,16 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
-import 'package:bluebubbles/helpers/types/constants.dart';
-import 'package:bluebubbles/helpers/ui/ui_helpers.dart';
-import 'package:bluebubbles/services/backend/java_dart_interop/intents_service.dart';
 import 'package:bluebubbles/services/backend/java_dart_interop/method_channel_service.dart';
 import 'package:bluebubbles/services/backend/settings/settings_service.dart';
-import 'package:bluebubbles/services/backend_ui_interop/event_dispatcher.dart';
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
-import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:faker/faker.dart' hide Image, Color;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

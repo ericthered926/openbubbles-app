@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pull_down_button/pull_down_button.dart';
 import 'package:tuple/tuple.dart';
-import 'package:flutter/gestures.dart';
 import 'dart:io';
 
 class TimestampSeparator extends StatelessWidget {

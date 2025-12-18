@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:bluebubbles/app/layouts/conversation_details/dialogs/address_picker.dart';
 import 'package:bluebubbles/app/layouts/conversation_details/dialogs/change_name.dart';
-import 'package:bluebubbles/app/layouts/conversation_details/widgets/contact_tile.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/theming/avatar/avatar_crop.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
@@ -18,7 +17,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:universal_io/io.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
 
 class ChatInfo extends StatefulWidget {
@@ -188,7 +186,7 @@ class _ChatInfoState extends OptimizedState<ChatInfo> {
                               width: 30,
                               height: 30,
                               decoration: BoxDecoration(
-                                border: Border.all(color: context.theme.colorScheme.background, width: 1),
+                                border: Border.all(color: context.theme.colorScheme.surface, width: 1),
                                 shape: BoxShape.circle,
                                 color: context.theme.colorScheme.tertiaryContainer,
                               ),
@@ -216,13 +214,13 @@ class _ChatInfoState extends OptimizedState<ChatInfo> {
                 text: TextSpan(
                   style: context.theme.textTheme.headlineMedium!.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: context.theme.colorScheme.onBackground,
+                    color: context.theme.colorScheme.onSurface,
                   ),
                   children: MessageHelper.buildEmojiText(
                     _title,
                     context.theme.textTheme.headlineMedium!.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: context.theme.colorScheme.onBackground,
+                      color: context.theme.colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -263,7 +261,7 @@ class _ChatInfoState extends OptimizedState<ChatInfo> {
                     ),
                   ),
                 ),
-                trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onBackground),
+                trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onSurface),
               ),
             ),
           ),
@@ -278,7 +276,7 @@ class _ChatInfoState extends OptimizedState<ChatInfo> {
                   updatePhoto();
                 },
                 title: Text("Update group photo", style: context.theme.textTheme.bodyLarge!),
-                trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onBackground),
+                trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onSurface),
               ),
             ),
           ),

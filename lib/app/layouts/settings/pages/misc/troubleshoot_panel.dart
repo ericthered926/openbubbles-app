@@ -17,7 +17,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:universal_io/io.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
@@ -110,7 +109,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                                             borderRadius:
                                                 BorderRadius.circular(25),
                                             color: context
-                                                .theme.colorScheme.background,
+                                                .theme.colorScheme.surface,
                                           ),
                                           padding: const EdgeInsets.all(10),
                                           child: Obx(() => ListView.builder(
@@ -125,7 +124,7 @@ class _TroubleshootPanelState extends OptimizedState<TroubleshootPanel> {
                                                       color: context
                                                           .theme
                                                           .colorScheme
-                                                          .onBackground,
+                                                          .onSurface,
                                                       fontSize: 10,
                                                     ),
                                                   );

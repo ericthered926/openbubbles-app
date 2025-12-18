@@ -4,22 +4,12 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
 import 'package:bluebubbles/app/components/custom/custom_bouncing_scroll_physics.dart';
-import 'package:bluebubbles/app/layouts/chat_creator/chat_creator.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
-import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/pages/conversation_list.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/conversation_tile.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/pinned_conversation_tile.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/conversation_list_fab.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/cupertino_header.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
-import 'package:bluebubbles/app/wrappers/scrollbar_wrapper.dart';
 import 'package:bluebubbles/services/services.dart';
-import 'package:crop_your_image/crop_your_image.dart';
 import 'package:file_picker/file_picker.dart' as fp;
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -31,9 +21,6 @@ import 'dart:ui' as ui;
 import 'package:get/get.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 import 'dart:math' as math;
 
@@ -116,7 +103,7 @@ class PosterEditState
 
   Color get backgroundColor =>
       ss.settings.windowEffect.value == WindowEffect.disabled
-          ? context.theme.colorScheme.background
+          ? context.theme.colorScheme.surface
           : Colors.transparent;
 
 
@@ -618,7 +605,7 @@ class PosterEditState
       );
       updatePoster(newPoster);
     });
-    } catch(e, s) {
+    } catch(e) {
       Get.back();
       showSnackbar("Error", "Failed to update profile! $e");
       rethrow;
@@ -655,7 +642,7 @@ class PosterEditState
       child: Scaffold(
       backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled
           ? Colors.transparent
-          : context.theme.colorScheme.background,
+          : context.theme.colorScheme.surface,
       extendBodyBehindAppBar: true,
       body: Stack(
         fit: StackFit.expand,
@@ -1061,7 +1048,7 @@ class PosterEditState
 
                     widget.posterEdited(posterPath);
                     ownedPosterPath = null;
-                    } catch(e, s) {
+                    } catch(e) {
                       Get.back();
                       showSnackbar("Error", "Failed to update profile! $e");
                       rethrow;

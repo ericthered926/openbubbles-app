@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:async_task/async_task_extension.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/conversation_list.dart';
-import 'package:bluebubbles/app/layouts/settings/dialogs/custom_headers_dialog.dart';
 import 'package:bluebubbles/app/layouts/settings/widgets/layout/settings_section.dart';
 import 'package:bluebubbles/app/layouts/setup/dialogs/failed_to_scan_dialog.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/page_template.dart';
@@ -20,7 +19,6 @@ import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
@@ -362,7 +360,7 @@ class HwInpState extends OptimizedState<HwInp> {
     T result;
     try {
       result = await inner;
-    } catch (e, s) {
+    } catch (e) {
       Get.back();
       if (e.toString().contains("Ticket not reserved!")) {
         controller.token = null;
@@ -384,7 +382,7 @@ class HwInpState extends OptimizedState<HwInp> {
     String token;
     try {
       token = await controller.ensureToken();
-    } catch (e, s) {
+    } catch (e) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -804,15 +802,15 @@ class HwInpState extends OptimizedState<HwInp> {
                               padding: const EdgeInsets.all(2),
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  shadowColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  shadowColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading ? null : () async {
                                   if (stagingNonInp) {
@@ -830,11 +828,11 @@ class HwInpState extends OptimizedState<HwInp> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(stagingNonInp ? Icons.close : Icons.arrow_back, color: context.theme.colorScheme.onBackground, size: 20),
+                                    Icon(stagingNonInp ? Icons.close : Icons.arrow_back, color: context.theme.colorScheme.onSurface, size: 20),
                                     const SizedBox(width: 10),
                                     Text(stagingNonInp ? "Cancel" : "Back",
                                         style: context.theme.textTheme.bodyLarge!
-                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onBackground)),
+                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onSurface)),
                                   ],
                                 ),
                               ),
@@ -852,15 +850,15 @@ class HwInpState extends OptimizedState<HwInp> {
                               padding: const EdgeInsets.all(2),
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  shadowColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  shadowColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading ? null : () async {
                                   scanQRCode();
@@ -870,9 +868,9 @@ class HwInpState extends OptimizedState<HwInp> {
                                   children: [
                                     Text("Scan Code",
                                         style: context.theme.textTheme.bodyLarge!
-                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onBackground)),
+                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onSurface)),
                                     const SizedBox(width: 10),
-                                    Icon(Icons.qr_code, color: context.theme.colorScheme.onBackground, size: 20),
+                                    Icon(Icons.qr_code, color: context.theme.colorScheme.onSurface, size: 20),
                                   ],
                                 ),
                               ),
@@ -889,15 +887,15 @@ class HwInpState extends OptimizedState<HwInp> {
                               height: 40,
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                                  shadowColor: WidgetStateProperty.all(Colors.transparent),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading || (kIsDesktop && staging == null) ? null : () async {
                                   ss.settings.customHeaders.value = {};

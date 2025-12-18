@@ -11,7 +11,6 @@ import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/app/wrappers/scrollbar_wrapper.dart';
-import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/database/models.dart';
@@ -561,7 +560,7 @@ class MessagesViewState extends OptimizedState<MessagesView> {
                                                                 .copyWith(color: Colors.deepPurple)),
                                                         style: TextButton.styleFrom(
                                                           padding: EdgeInsets.zero,
-                                                          minimumSize: Size(50, 30),
+                                                          minimumSize: const Size(50, 30),
                                                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                                           alignment: Alignment.centerLeft),
                                                         onPressed: () async {

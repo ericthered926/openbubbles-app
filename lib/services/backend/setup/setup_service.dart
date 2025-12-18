@@ -3,13 +3,21 @@ import 'package:bluebubbles/helpers/network/network_tasks.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:get/get.dart';
 
-SetupService setup = Get.isRegistered<SetupService>() ? Get.find<SetupService>() : Get.put(SetupService());
+SetupService setup = Get.isRegistered<SetupService>()
+    ? Get.find<SetupService>()
+    : Get.put(SetupService());
 
 class SetupService extends GetxService {
-  Future<void> startSetup(int numberOfMessagesPerPage, bool skipEmptyChats, bool saveToDownloads) async {
+  Future<void> startSetup(
+    int numberOfMessagesPerPage,
+    bool skipEmptyChats,
+    bool saveToDownloads, {
+    int? syncStartDate,
+  }) async {
     sync.numberOfMessagesPerPage = numberOfMessagesPerPage;
     sync.skipEmptyChats = skipEmptyChats;
     sync.saveToDownloads = saveToDownloads;
+    sync.syncStartDate = syncStartDate;
     await sync.startFullSync();
     await finishSetup();
   }

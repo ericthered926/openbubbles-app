@@ -505,7 +505,7 @@ class _MessageHolderState extends CustomState<MessageHolder, void, MessageWidget
                                                                             decoration: BoxDecoration(
                                                                               color: !message.isBigEmoji
                                                                                   ? context.theme.colorScheme.primary
-                                                                                  : context.theme.colorScheme.background,
+                                                                                  : context.theme.colorScheme.surface,
                                                                             ),
                                                                             constraints: BoxConstraints(
                                                                               maxWidth: ns.width(context) * MessageWidgetController.maxBubbleSizeFactor - 40,

@@ -176,7 +176,7 @@ class AttachmentsService extends GetxService {
                       durationMs: 3000,
                       button: TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor: Get.theme.colorScheme.surfaceVariant,
+                          backgroundColor: Get.theme.colorScheme.surfaceContainerHighest,
                         ),
                         onPressed: () {
                           launchUrl(Uri.file(savePath));
@@ -202,7 +202,7 @@ class AttachmentsService extends GetxService {
           durationMs: 3000,
           button: TextButton(
             style: TextButton.styleFrom(
-              backgroundColor: Get.theme.colorScheme.surfaceVariant,
+              backgroundColor: Get.theme.colorScheme.surfaceContainerHighest,
             ),
             onPressed: () {
               launchUrl(Uri.file(savePath));

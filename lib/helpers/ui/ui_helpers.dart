@@ -103,7 +103,7 @@ Widget buildBackButton(BuildContext context, {EdgeInsets padding = EdgeInsets.ze
 }
 
 Widget buildProgressIndicator(BuildContext context, {double size = 20, double strokeWidth = 2, ui.Brightness? brightness}) {
-  brightness ??= ThemeData.estimateBrightnessForColor(context.theme.colorScheme.background);
+  brightness ??= ThemeData.estimateBrightnessForColor(context.theme.colorScheme.surface);
   return ss.settings.skin.value == Skins.iOS
       ? Theme(
           data: ThemeData(
@@ -483,7 +483,7 @@ Future<void> paintGroupAvatar({
         ..layout()
         ..paint(canvas, Offset(left + realSize * 0.25, top + realSize * 0.25));
     } else {
-      Paint paint = Paint()..color = ss.settings.skin.value == Skins.Samsung ? theme.colorScheme.secondary : theme.colorScheme.background;
+      Paint paint = Paint()..color = ss.settings.skin.value == Skins.Samsung ? theme.colorScheme.secondary : theme.colorScheme.surface;
       canvas.drawCircle(Offset(left + realSize * 0.5, top + realSize * 0.5), realSize * 0.5, paint);
       await paintAvatar(
         handle: participants[index],

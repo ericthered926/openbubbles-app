@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
@@ -21,10 +20,8 @@ import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'package:in_app_purchase_android/billing_client_wrappers.dart';
 import 'package:get/get.dart';
-import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:telephony_plus/telephony_plus.dart';
@@ -99,7 +96,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
     T result;
     try {
       result = await inner;
-    } catch (e, s) {
+    } catch (e) {
       Get.back();
       showSnackbar("Failure! Please try again", e.toString());
       rethrow;
@@ -188,7 +185,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
               image: image,
               poster: poster != null ? await api.fromPoster(poster: poster) : null,
             ), existing: existing);
-          } catch(e, s) {
+          } catch(e) {
             Get.back();
             showSnackbar("Error", "Failed to update profile! $e");
             rethrow;
@@ -373,7 +370,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
                             : ss.settings.iCloudAccount.isEmpty
                             ? "Unknown iCloud account"
                             : ss.settings.iCloudAccount.value, style: context.theme.textTheme.bodyMedium!.apply(color: context.theme.colorScheme.outline)),
-                        trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onBackground),
+                        trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onSurface),
                       ),
                     ),
                   ),
@@ -387,7 +384,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
                           updatePhoto();
                         },
                         title: Text("Update your photo", style: context.theme.textTheme.bodyLarge!),
-                        trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onBackground),
+                        trailing: Icon(Icons.edit_outlined, color: context.theme.colorScheme.onSurface),
                       ),
                     ),
                   ),
@@ -575,7 +572,7 @@ class _ProfilePanelState extends OptimizedState<ProfilePanel> with WidgetsBindin
                       if (accountInfo['login_status_message']?.startsWith("Deregistered") ?? false)
                         Container(
                           color: tileColor,
-                          child: SettingsDivider(color: context.theme.colorScheme.surfaceVariant, padding: EdgeInsets.zero,),
+                          child: SettingsDivider(color: context.theme.colorScheme.surfaceContainerHighest, padding: EdgeInsets.zero,),
                         ),
                       if ((accountInfo['login_status_message']?.startsWith("Deregistered") ?? false) || (accountInfo['login_status_message']?.contains("Subscription not active!") ?? false))
                         SettingsTile(

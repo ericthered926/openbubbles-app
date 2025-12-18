@@ -17,7 +17,6 @@ import "package:languagetool_textfield/core/enums/mistake_type.dart";
 import 'package:languagetool_textfield/languagetool_textfield.dart';
 import "package:languagetool_textfield/utils/closed_range.dart";
 import "package:languagetool_textfield/utils/keep_latest_response_service.dart";
-import 'package:tuple/tuple.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
 
 class Mentionable {
@@ -765,7 +764,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
         }
 
         var annotations = annotationsForRange(range);
-        var already = annotations!.every((a) => a.bold == true);
+        var already = annotations.every((a) => a.bold == true);
         markRange(range, Annotation(bold: !already));
         refresh();
       },
@@ -777,7 +776,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
         }
 
         var annotations = annotationsForRange(range);
-        var already = annotations!.every((a) => a.italic == true);
+        var already = annotations.every((a) => a.italic == true);
         markRange(range, Annotation(italic: !already));
         refresh();
       },
@@ -789,7 +788,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
         }
 
         var annotations = annotationsForRange(range);
-        var already = annotations!.every((a) => a.strikethrough == true);
+        var already = annotations.every((a) => a.strikethrough == true);
         markRange(range, Annotation(strikethrough: !already));
         refresh();
       },
@@ -801,7 +800,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
         }
 
         var annotations = annotationsForRange(range);
-        var already = annotations!.every((a) => a.underline == true);
+        var already = annotations.every((a) => a.underline == true);
         markRange(range, Annotation(underline: !already));
         refresh();
       },
@@ -815,7 +814,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
         range = TextSelection(baseOffset: range.extentOffset, extentOffset: range.baseOffset);
       }
       var annotations = annotationsForRange(range);
-      var mention = annotations?.firstWhereOrNull((r) => r.mentionedAddress != null);
+      var mention = annotations.firstWhereOrNull((r) => r.mentionedAddress != null);
 
       return AdaptiveTextSelectionToolbar.editableText(
         editableTextState: editableTextState
@@ -855,7 +854,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           [
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.bold == true);
+              var already = annotations.every((a) => a.bold == true);
               markRange(range, Annotation(bold: !already));
               editableTextState.hideToolbar();
               refresh();
@@ -864,7 +863,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           ),
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.italic == true);
+              var already = annotations.every((a) => a.italic == true);
               markRange(range, Annotation(italic: !already));
               editableTextState.hideToolbar();
               refresh();
@@ -873,7 +872,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           ),
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.strikethrough == true);
+              var already = annotations.every((a) => a.strikethrough == true);
               markRange(range, Annotation(strikethrough: !already));
               editableTextState.hideToolbar();
               refresh();
@@ -882,7 +881,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           ),
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.underline == true);
+              var already = annotations.every((a) => a.underline == true);
               markRange(range, Annotation(underline: !already));
               editableTextState.hideToolbar();
               refresh();
@@ -891,7 +890,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           ),
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.textEffect == Attributes.BIG);
+              var already = annotations.every((a) => a.textEffect == Attributes.BIG);
               markRange(range, Annotation(textEffect: already ? null : Attributes.BIG));
               editableTextState.hideToolbar();
               refresh();
@@ -900,7 +899,7 @@ class MentionTextEditingController extends SpellCheckTextEditingController {
           ),
           ContextMenuButtonItem(
             onPressed: () {
-              var already = annotations!.every((a) => a.textEffect == Attributes.SMALL);
+              var already = annotations.every((a) => a.textEffect == Attributes.SMALL);
               markRange(range, Annotation(textEffect: already ? null : Attributes.SMALL));
               editableTextState.hideToolbar();
               refresh();

@@ -31,7 +31,7 @@ class _MaterialConversationListState extends OptimizedState<MaterialConversation
   RxList<Chat> get deletedChats => widget.parentController.deletedChats;
 
   Color get backgroundColor => ss.settings.windowEffect.value == WindowEffect.disabled
-      ? context.theme.colorScheme.background
+      ? context.theme.colorScheme.surface
       : Colors.transparent;
   ConversationListController get controller => widget.parentController;
 

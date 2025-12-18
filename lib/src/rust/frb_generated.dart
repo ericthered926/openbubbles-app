@@ -8046,9 +8046,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FFIFilePackager dco_decode_ffi_file_packager(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 0)
+    if (arr.isNotEmpty)
       throw Exception('unexpected arr length: expect 0 but see ${arr.length}');
-    return FFIFilePackager();
+    return const FFIFilePackager();
   }
 
   @protected
@@ -8769,13 +8769,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return LoginState_LoggedIn();
+        return const LoginState_LoggedIn();
       case 1:
-        return LoginState_NeedsDevice2FA();
+        return const LoginState_NeedsDevice2FA();
       case 2:
-        return LoginState_Needs2FAVerification();
+        return const LoginState_Needs2FAVerification();
       case 3:
-        return LoginState_NeedsSMS2FA();
+        return const LoginState_NeedsSMS2FA();
       case 4:
         return LoginState_NeedsSMS2FAVerification(
           dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVerifyBody(
@@ -8786,7 +8786,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_String(raw[1]),
         );
       case 6:
-        return LoginState_NeedsLogin();
+        return const LoginState_NeedsLogin();
       default:
         throw Exception("unreachable");
     }
@@ -8880,9 +8880,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_box_autoadd_react_message(raw[1]),
         );
       case 4:
-        return Message_Delivered();
+        return const Message_Delivered();
       case 5:
-        return Message_Read();
+        return const Message_Read();
       case 6:
         return Message_Typing(
           dco_decode_bool(raw[1]),
@@ -8905,15 +8905,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_bool(raw[1]),
         );
       case 11:
-        return Message_MessageReadOnDevice();
+        return const Message_MessageReadOnDevice();
       case 12:
         return Message_SmsConfirmSent(
           dco_decode_bool(raw[1]),
         );
       case 13:
-        return Message_MarkUnread();
+        return const Message_MarkUnread();
       case 14:
-        return Message_PeerCacheInvalidate();
+        return const Message_PeerCacheInvalidate();
       case 15:
         return Message_UpdateExtension(
           dco_decode_box_autoadd_update_extension_message(raw[1]),
@@ -8935,7 +8935,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_box_autoadd_permanent_delete_message(raw[1]),
         );
       case 20:
-        return Message_Unschedule();
+        return const Message_Unschedule();
       case 21:
         return Message_UpdateProfile(
           dco_decode_box_autoadd_update_profile_message(raw[1]),
@@ -8949,7 +8949,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_box_autoadd_share_profile_message(raw[1]),
         );
       case 24:
-        return Message_NotifyAnyways();
+        return const Message_NotifyAnyways();
       case 25:
         return Message_SetTranscriptBackground(
           dco_decode_box_autoadd_set_transcript_background_message(raw[1]),
@@ -9153,7 +9153,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return MessageType_IMessage();
+        return const MessageType_IMessage();
       case 1:
         return MessageType_SMS(
           isPhone: dco_decode_bool(raw[1]),
@@ -9243,9 +9243,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MyAsyncRuntime dco_decode_my_async_runtime(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 0)
+    if (arr.isNotEmpty)
       throw Exception('unexpected arr length: expect 0 but see ${arr.length}');
-    return MyAsyncRuntime();
+    return const MyAsyncRuntime();
   }
 
   @protected
@@ -9964,7 +9964,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return PollResult_Stop();
+        return const PollResult_Stop();
       case 1:
         return PollResult_Cont(
           dco_decode_opt_box_autoadd_push_message(raw[1]),
@@ -10066,7 +10066,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           needsToResolveVariation: dco_decode_bool(raw[5]),
         );
       case 1:
-        return PRPosterContentMaterialStyle_PRPosterContentVibrantMaterialStyle();
+        return const PRPosterContentMaterialStyle_PRPosterContentVibrantMaterialStyle();
       case 2:
         return PRPosterContentMaterialStyle_PRPosterContentGradientStyle(
           gradientType: dco_decode_u_32(raw[1]),
@@ -10172,7 +10172,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dco_decode_bool(raw[1]),
         );
       case 8:
-        return PushMessage_CircleFinishEvent();
+        return const PushMessage_CircleFinishEvent();
       default:
         throw Exception("unreachable");
     }
@@ -10231,17 +10231,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return Reaction_Heart();
+        return const Reaction_Heart();
       case 1:
-        return Reaction_Like();
+        return const Reaction_Like();
       case 2:
-        return Reaction_Dislike();
+        return const Reaction_Dislike();
       case 3:
-        return Reaction_Laugh();
+        return const Reaction_Laugh();
       case 4:
-        return Reaction_Emphasize();
+        return const Reaction_Emphasize();
       case 5:
-        return Reaction_Question();
+        return const Reaction_Question();
       case 6:
         return Reaction_Emoji(
           dco_decode_String(raw[1]),
@@ -10680,7 +10680,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           nextS: dco_decode_i_64(raw[1]),
         );
       case 1:
-        return RegisterState_Registering();
+        return const RegisterState_Registering();
       case 2:
         return RegisterState_Failed(
           retryWait: dco_decode_opt_box_autoadd_u_64(raw[1]),
@@ -10920,7 +10920,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return SyncStatus_Synced();
+        return const SyncStatus_Synced();
       case 1:
         return SyncStatus_Downloading(
           progress: dco_decode_usize(raw[1]),
@@ -10932,7 +10932,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           total: dco_decode_usize(raw[2]),
         );
       case 3:
-        return SyncStatus_Syncing();
+        return const SyncStatus_Syncing();
       default:
         throw Exception("unreachable");
     }
@@ -13223,7 +13223,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   FFIFilePackager sse_decode_ffi_file_packager(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return FFIFilePackager();
+    return const FFIFilePackager();
   }
 
   @protected
@@ -14233,13 +14233,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return LoginState_LoggedIn();
+        return const LoginState_LoggedIn();
       case 1:
-        return LoginState_NeedsDevice2FA();
+        return const LoginState_NeedsDevice2FA();
       case 2:
-        return LoginState_Needs2FAVerification();
+        return const LoginState_Needs2FAVerification();
       case 3:
-        return LoginState_NeedsSMS2FA();
+        return const LoginState_NeedsSMS2FA();
       case 4:
         var var_field0 =
             sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVerifyBody(
@@ -14249,7 +14249,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_String(deserializer);
         return LoginState_NeedsExtraStep(var_field0);
       case 6:
-        return LoginState_NeedsLogin();
+        return const LoginState_NeedsLogin();
       default:
         throw UnimplementedError('');
     }
@@ -14346,9 +14346,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_box_autoadd_react_message(deserializer);
         return Message_React(var_field0);
       case 4:
-        return Message_Delivered();
+        return const Message_Delivered();
       case 5:
-        return Message_Read();
+        return const Message_Read();
       case 6:
         var var_field0 = sse_decode_bool(deserializer);
         var var_field1 = sse_decode_opt_box_autoadd_typing_app(deserializer);
@@ -14367,14 +14367,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_bool(deserializer);
         return Message_EnableSmsActivation(var_field0);
       case 11:
-        return Message_MessageReadOnDevice();
+        return const Message_MessageReadOnDevice();
       case 12:
         var var_field0 = sse_decode_bool(deserializer);
         return Message_SmsConfirmSent(var_field0);
       case 13:
-        return Message_MarkUnread();
+        return const Message_MarkUnread();
       case 14:
-        return Message_PeerCacheInvalidate();
+        return const Message_PeerCacheInvalidate();
       case 15:
         var var_field0 =
             sse_decode_box_autoadd_update_extension_message(deserializer);
@@ -14394,7 +14394,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sse_decode_box_autoadd_permanent_delete_message(deserializer);
         return Message_PermanentDelete(var_field0);
       case 20:
-        return Message_Unschedule();
+        return const Message_Unschedule();
       case 21:
         var var_field0 =
             sse_decode_box_autoadd_update_profile_message(deserializer);
@@ -14408,7 +14408,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             sse_decode_box_autoadd_share_profile_message(deserializer);
         return Message_ShareProfile(var_field0);
       case 24:
-        return Message_NotifyAnyways();
+        return const Message_NotifyAnyways();
       case 25:
         var var_field0 =
             sse_decode_box_autoadd_set_transcript_background_message(
@@ -14631,7 +14631,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return MessageType_IMessage();
+        return const MessageType_IMessage();
       case 1:
         var var_isPhone = sse_decode_bool(deserializer);
         var var_usingNumber = sse_decode_String(deserializer);
@@ -14728,7 +14728,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   MyAsyncRuntime sse_decode_my_async_runtime(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return MyAsyncRuntime();
+    return const MyAsyncRuntime();
   }
 
   @protected
@@ -15752,7 +15752,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return PollResult_Stop();
+        return const PollResult_Stop();
       case 1:
         var var_field0 = sse_decode_opt_box_autoadd_push_message(deserializer);
         return PollResult_Cont(var_field0);
@@ -15852,7 +15852,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             supportsVariation: var_supportsVariation,
             needsToResolveVariation: var_needsToResolveVariation);
       case 1:
-        return PRPosterContentMaterialStyle_PRPosterContentVibrantMaterialStyle();
+        return const PRPosterContentMaterialStyle_PRPosterContentVibrantMaterialStyle();
       case 2:
         var var_gradientType = sse_decode_u_32(deserializer);
         var var_colors = sse_decode_list_ui_color(deserializer);
@@ -15970,7 +15970,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_field0 = sse_decode_bool(deserializer);
         return PushMessage_TwoFaAuthEvent(var_field0);
       case 8:
-        return PushMessage_CircleFinishEvent();
+        return const PushMessage_CircleFinishEvent();
       default:
         throw UnimplementedError('');
     }
@@ -16034,17 +16034,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return Reaction_Heart();
+        return const Reaction_Heart();
       case 1:
-        return Reaction_Like();
+        return const Reaction_Like();
       case 2:
-        return Reaction_Dislike();
+        return const Reaction_Dislike();
       case 3:
-        return Reaction_Laugh();
+        return const Reaction_Laugh();
       case 4:
-        return Reaction_Emphasize();
+        return const Reaction_Emphasize();
       case 5:
-        return Reaction_Question();
+        return const Reaction_Question();
       case 6:
         var var_field0 = sse_decode_String(deserializer);
         return Reaction_Emoji(var_field0);
@@ -16361,7 +16361,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_nextS = sse_decode_i_64(deserializer);
         return RegisterState_Registered(nextS: var_nextS);
       case 1:
-        return RegisterState_Registering();
+        return const RegisterState_Registering();
       case 2:
         var var_retryWait = sse_decode_opt_box_autoadd_u_64(deserializer);
         var var_error = sse_decode_String(deserializer);
@@ -16597,7 +16597,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return SyncStatus_Synced();
+        return const SyncStatus_Synced();
       case 1:
         var var_progress = sse_decode_usize(deserializer);
         var var_total = sse_decode_usize(deserializer);
@@ -16607,7 +16607,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         var var_total = sse_decode_usize(deserializer);
         return SyncStatus_Uploading(progress: var_progress, total: var_total);
       case 3:
-        return SyncStatus_Syncing();
+        return const SyncStatus_Syncing();
       default:
         throw UnimplementedError('');
     }

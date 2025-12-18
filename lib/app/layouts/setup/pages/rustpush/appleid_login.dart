@@ -220,15 +220,15 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                               padding: const EdgeInsets.all(2),
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  shadowColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  shadowColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading ? null : () async {
                                   controller.pageController.previousPage(
@@ -239,11 +239,11 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.arrow_back, color: context.theme.colorScheme.onBackground, size: 20),
+                                    Icon(Icons.arrow_back, color: context.theme.colorScheme.onSurface, size: 20),
                                     const SizedBox(width: 10),
                                     Text("Back",
                                         style: context.theme.textTheme.bodyLarge!
-                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onBackground)),
+                                            .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onSurface)),
                                   ],
                                 ),
                               ),
@@ -260,15 +260,15 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                               height: 40,
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                                  shadowColor: MaterialStateProperty.all(Colors.transparent),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(Colors.transparent),
+                                  shadowColor: WidgetStateProperty.all(Colors.transparent),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading ? null : () async {
                                   ss.settings.customHeaders.value = {};
@@ -311,15 +311,15 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                               padding: const EdgeInsets.all(2),
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  shape: WidgetStateProperty.all<RoundedRectangleBorder>(
                                     RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(20.0),
                                     ),
                                   ),
-                                  backgroundColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  shadowColor: MaterialStateProperty.all(context.theme.colorScheme.background),
-                                  maximumSize: MaterialStateProperty.all(const Size(200, 36)),
-                                  minimumSize: MaterialStateProperty.all(const Size(30, 30)),
+                                  backgroundColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  shadowColor: WidgetStateProperty.all(context.theme.colorScheme.surface),
+                                  maximumSize: WidgetStateProperty.all(const Size(200, 36)),
+                                  minimumSize: WidgetStateProperty.all(const Size(30, 30)),
                                 ),
                                 onPressed: loading ? null : () async {
                                   controller.updateConnectError("");
@@ -364,9 +364,9 @@ class _AppleIdLoginState extends OptimizedState<AppleIdLogin> {
                                       children: [
                                         Text("Skip",
                                             style: context.theme.textTheme.bodyLarge!
-                                                .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onBackground)),
+                                                .apply(fontSizeFactor: 1.1, color: context.theme.colorScheme.onSurface)),
                                         const SizedBox(width: 10),
-                                        Icon(Icons.arrow_forward, color: context.theme.colorScheme.onBackground, size: 20),
+                                        Icon(Icons.arrow_forward, color: context.theme.colorScheme.onSurface, size: 20),
                                       ],
                                     ),),
                                     if (loading)

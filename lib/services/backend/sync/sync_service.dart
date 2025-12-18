@@ -9,6 +9,7 @@ import 'package:bluebubbles/services/network/http_overrides.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
+import 'package:bluebubbles/services/backend/sync/handle_cache.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -17,16 +18,25 @@ import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:universal_io/io.dart';
 
-SyncService sync = Get.isRegistered<SyncService>() ? Get.find<SyncService>() : Get.put(SyncService());
+SyncService sync = Get.isRegistered<SyncService>()
+    ? Get.find<SyncService>()
+    : Get.put(SyncService());
 
 class SyncService extends GetxService {
   int numberOfMessagesPerPage = 25;
   bool skipEmptyChats = true;
   bool saveToDownloads = false;
+
+  /// Start date for syncing messages (null = sync all messages)
+  /// Represented as milliseconds since epoch
+  int? syncStartDate;
   final RxBool isIncrementalSyncing = false.obs;
 
   FullSyncManager? _manager;
   FullSyncManager? get fullSyncManager => _manager;
+
+  /// Number of chats to sync in parallel (default: 5)
+  int parallelChats = 5;
 
   Future<void> startFullSync() async {
     // Set the last sync date (for incremental, even though this isn't incremental)
@@ -35,13 +45,19 @@ class SyncService extends GetxService {
       await cs.refreshContacts();
       return; // no syncing if no remote
     }
-    ss.settings.lastIncrementalSync.value = DateTime.now().millisecondsSinceEpoch;
+    ss.settings.lastIncrementalSync.value =
+        DateTime.now().millisecondsSinceEpoch;
     await ss.saveSettings();
 
+    // Pre-warm handle cache for better performance during sync
+    await handleCache.warmUp();
+
     _manager = FullSyncManager(
-        messageCount: numberOfMessagesPerPage.toInt(),
-        skipEmptyChats: skipEmptyChats,
-        saveLogs: saveToDownloads
+      startTimestamp: syncStartDate ?? 0,
+      messageCount: numberOfMessagesPerPage.toInt(),
+      skipEmptyChats: skipEmptyChats,
+      parallelChats: parallelChats,
+      saveLogs: saveToDownloads,
     );
     await _manager!.start();
   }
@@ -56,7 +72,8 @@ class SyncService extends GetxService {
     List<List<int>> result = [];
     if (kIsWeb || kIsDesktop) {
       result = await incrementalSyncIsolate.call(null);
-      if (result.isNotEmpty && (result.first.isNotEmpty || result.last.isNotEmpty)) {
+      if (result.isNotEmpty &&
+          (result.first.isNotEmpty || result.last.isNotEmpty)) {
         contacts.addAll(cs.contacts);
       }
     } else {
@@ -69,16 +86,21 @@ class SyncService extends GetxService {
 
       FlutterIsolate? isolate;
       try {
-        isolate = await FlutterIsolate.spawn(incrementalSyncIsolate, [port.sendPort, http.originOverride]);
+        isolate = await FlutterIsolate.spawn(incrementalSyncIsolate, [
+          port.sendPort,
+          http.originOverride,
+        ]);
       } catch (e, stack) {
         Logger.error('Got error when opening isolate!', error: e, trace: stack);
         port.close();
       }
       result = await completer.future;
-      if (result.isNotEmpty && (result.first.isNotEmpty || result.last.isNotEmpty)) {
+      if (result.isNotEmpty &&
+          (result.first.isNotEmpty || result.last.isNotEmpty)) {
         contacts.addAll(Contact.getContacts());
         // auto upload contacts if requested
-        if (ss.settings.syncContactsAutomatically.value && backend.getRemoteService() != null) {
+        if (ss.settings.syncContactsAutomatically.value &&
+            backend.getRemoteService() != null) {
           Logger.debug("Contact changes detected, uploading to server...");
           final _contacts = <Map<String, dynamic>>[];
           for (Contact c in contacts) {
@@ -87,9 +109,17 @@ class SyncService extends GetxService {
           }
           http.createContact(_contacts).catchError((err, stack) {
             if (err is Response) {
-              Logger.error(err.data["error"]["message"].toString(), error: err, trace: stack);
+              Logger.error(
+                err.data["error"]["message"].toString(),
+                error: err,
+                trace: stack,
+              );
             } else {
-              Logger.error("Failed to create contacts!", error: err, trace: stack);
+              Logger.error(
+                "Failed to create contacts!",
+                error: err,
+                trace: stack,
+              );
             }
             return Response(requestOptions: RequestOptions(path: ''));
           });
@@ -128,7 +158,10 @@ Future<List<List<int>>> incrementalSyncIsolate(List? items) async {
     int syncStart = ss.settings.lastIncrementalSync.value;
     int startRowId = ss.settings.lastIncrementalSyncRowId.value;
     final incrementalSyncManager = IncrementalSyncManager(
-      startTimestamp: syncStart, startRowId: startRowId, saveMarker: true);
+      startTimestamp: syncStart,
+      startRowId: startRowId,
+      saveMarker: true,
+    );
     await incrementalSyncManager.start();
     chats.sort();
   } catch (ex, s) {

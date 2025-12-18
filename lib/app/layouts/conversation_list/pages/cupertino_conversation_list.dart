@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
 import 'package:bluebubbles/app/layouts/chat_creator/chat_creator.dart';
-import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/conversation_list/pages/conversation_list.dart';
@@ -45,7 +43,7 @@ class CupertinoConversationListState
   bool canPnr = true;
   Color get backgroundColor =>
       ss.settings.windowEffect.value == WindowEffect.disabled
-          ? context.theme.colorScheme.background
+          ? context.theme.colorScheme.surface
           : Colors.transparent;
 
   ConversationListController get controller => widget.parentController;
@@ -73,7 +71,7 @@ class CupertinoConversationListState
     return Scaffold(
       backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled
           ? Colors.transparent
-          : context.theme.colorScheme.background,
+          : context.theme.colorScheme.surface,
       extendBodyBehindAppBar: !showArchived && !showUnknown && !showDeleted,
       floatingActionButton: Obx(() =>
           !ss.settings.moveChatCreatorToHeader.value &&

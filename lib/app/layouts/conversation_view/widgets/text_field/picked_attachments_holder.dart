@@ -172,7 +172,7 @@ class _PickedAttachmentsHolderState extends OptimizedState<PickedAttachmentsHold
                   child: Container(
                     decoration: BoxDecoration(
                       border: iOS ? null : Border.fromBorderSide(
-                        BorderSide(color: context.theme.colorScheme.background, strokeAlign: BorderSide.strokeAlignOutside)
+                        BorderSide(color: context.theme.colorScheme.surface, strokeAlign: BorderSide.strokeAlignOutside)
                       ),
                       borderRadius: BorderRadius.circular(20),
                       color: context.theme.colorScheme.properSurface,
@@ -245,7 +245,7 @@ class _PickedAttachmentsHolderState extends OptimizedState<PickedAttachmentsHold
                   child: Container(
                     decoration: BoxDecoration(
                       border: iOS ? null : Border.fromBorderSide(
-                          BorderSide(color: context.theme.colorScheme.background, strokeAlign: BorderSide.strokeAlignOutside)
+                          BorderSide(color: context.theme.colorScheme.surface, strokeAlign: BorderSide.strokeAlignOutside)
                       ),
                       borderRadius: BorderRadius.circular(20),
                       color: context.theme.colorScheme.properSurface,

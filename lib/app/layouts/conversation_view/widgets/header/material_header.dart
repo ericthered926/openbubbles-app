@@ -30,7 +30,7 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Rx<Color> _backgroundColor = context.theme.colorScheme.background.withOpacity((kIsDesktop && ss.settings.windowEffect.value != WindowEffect.disabled) ? 0.4 : 1).obs;
+    final Rx<Color> _backgroundColor = context.theme.colorScheme.surface.withOpacity((kIsDesktop && ss.settings.windowEffect.value != WindowEffect.disabled) ? 0.4 : 1).obs;
 
     return Column(
       children:[
@@ -46,7 +46,7 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
       leading: Padding(
         padding: EdgeInsets.only(left: 5.0, top: kIsDesktop ? 20 : 0),
         child: BackButton(
-          color: context.theme.colorScheme.onBackground,
+          color: context.theme.colorScheme.onSurface,
           onPressed: () {
             if (controller.inSelectMode.value) {
               controller.inSelectMode.value = false;
@@ -100,14 +100,14 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
         ),
         if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isPhoneNumber)
           IconButton(
-            icon: Icon(Icons.call_outlined, color: context.theme.colorScheme.onBackground),
+            icon: Icon(Icons.call_outlined, color: context.theme.colorScheme.onSurface),
             onPressed: () {
               launchUrl(Uri(scheme: "tel", path: controller.chat.participants.first.address));
             },
           ),
         if (Platform.isAndroid && !controller.chat.isGroup && controller.chat.participants.first.address.isEmail)
           IconButton(
-            icon: Icon(Icons.mail_outlined, color: context.theme.colorScheme.onBackground),
+            icon: Icon(Icons.mail_outlined, color: context.theme.colorScheme.onSurface),
             onPressed: () {
               launchUrl(Uri(scheme: "mailto", path: controller.chat.participants.first.address));
             },
@@ -217,7 +217,7 @@ class MaterialHeader extends StatelessWidget implements PreferredSizeWidget {
             },
             icon: Icon(
               Icons.more_vert,
-              color: context.theme.colorScheme.onBackground,
+              color: context.theme.colorScheme.onSurface,
             ),
           ),
         )
@@ -525,7 +525,7 @@ class _ChatIconAndTitleState extends CustomState<_ChatIconAndTitle, void, Conver
                 }
                 return Text(
                   _title,
-                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onBackground, fontSizeFactor: 0.85),
+                  style: context.theme.textTheme.titleLarge!.apply(color: context.theme.colorScheme.onSurface, fontSizeFactor: 0.85),
                   maxLines: 1,
                   overflow: TextOverflow.fade,
                 );

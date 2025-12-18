@@ -163,7 +163,7 @@ class _BackupRestorePanelState extends OptimizedState<BackupRestorePanel> {
         headerColor: headerColor,
         actions: [
           IconButton(
-            icon: Icon(iOS ? CupertinoIcons.arrow_counterclockwise : Icons.refresh, color: context.theme.colorScheme.onBackground),
+            icon: Icon(iOS ? CupertinoIcons.arrow_counterclockwise : Icons.refresh, color: context.theme.colorScheme.onSurface),
             onPressed: () {
               setState(() {
                 fetching = true;
@@ -319,7 +319,7 @@ class _BackupRestorePanelState extends OptimizedState<BackupRestorePanel> {
                                       child: Container(
                                         padding: const EdgeInsets.all(10.0),
                                         decoration: BoxDecoration(
-                                            color: context.theme.colorScheme.background,
+                                            color: context.theme.colorScheme.surface,
                                             borderRadius: const BorderRadius.all(Radius.circular(10))
                                         ),
                                         child: SingleChildScrollView(
@@ -759,7 +759,7 @@ class _BackupRestorePanelState extends OptimizedState<BackupRestorePanel> {
                                       child: Container(
                                         padding: const EdgeInsets.all(10.0),
                                         decoration: BoxDecoration(
-                                            color: context.theme.colorScheme.background,
+                                            color: context.theme.colorScheme.surface,
                                             borderRadius: const BorderRadius.all(Radius.circular(10))
                                         ),
                                         child: SingleChildScrollView(

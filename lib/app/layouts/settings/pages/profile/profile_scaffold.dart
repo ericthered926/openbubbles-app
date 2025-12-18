@@ -1,22 +1,13 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:bluebubbles/app/components/avatars/contact_avatar_widget.dart';
-import 'package:bluebubbles/app/layouts/chat_creator/chat_creator.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/poster_edit.dart';
 import 'package:bluebubbles/app/layouts/settings/pages/profile/posterkit.dart';
 import 'package:bluebubbles/app/wrappers/theme_switcher.dart';
-import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/pages/conversation_list.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/conversation_tile.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/tile/pinned_conversation_tile.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/conversation_list_fab.dart';
-import 'package:bluebubbles/app/layouts/conversation_list/widgets/header/cupertino_header.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/app/wrappers/scrollbar_wrapper.dart';
 import 'package:bluebubbles/services/services.dart';
@@ -29,8 +20,6 @@ import 'package:get/get.dart';
 import 'package:bluebubbles/src/rust/api/api.dart' as api;
 import 'package:bluebubbles/services/rustpush/rustpush_service.dart';
 import 'package:palette_generator/palette_generator.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'dart:math' as math;
 
@@ -60,7 +49,7 @@ class ProfileScaffoldState
 
   Color get backgroundColor =>
       ss.settings.windowEffect.value == WindowEffect.disabled
-          ? context.theme.colorScheme.background
+          ? context.theme.colorScheme.surface
           : Colors.transparent;
 
   bool loaded = false;
@@ -145,7 +134,7 @@ class ProfileScaffoldState
     return Scaffold(
       backgroundColor: ss.settings.windowEffect.value != WindowEffect.disabled
           ? Colors.transparent
-          : context.theme.colorScheme.background,
+          : context.theme.colorScheme.surface,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
           preferredSize: Size(ns.width(context), 50),

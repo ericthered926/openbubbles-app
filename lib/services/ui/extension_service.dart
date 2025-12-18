@@ -3,8 +3,6 @@
 import 'dart:convert';
 
 import 'package:bluebubbles/database/database.dart';
-import 'package:bluebubbles/helpers/types/constants.dart';
-import 'package:bluebubbles/main.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
 import 'package:bluebubbles/services/services.dart';

@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:path/path.dart';
-import 'package:bluebubbles/src/rust/api/api.dart' as api;
 import 'package:universal_io/io.dart';
 
 class ConversationPanel extends StatefulWidget {
@@ -254,7 +253,7 @@ class _ConversationPanelState extends OptimizedState<ConversationPanel> {
                             ss.settings.receiveSoundPath.value = path2;
                             ss.saveSettings();
                             Get.back();
-                          } catch (e, s) {
+                          } catch (e) {
                             Get.back();
                             showSnackbar("Error", "Failed to fetch audio");
                             rethrow;
