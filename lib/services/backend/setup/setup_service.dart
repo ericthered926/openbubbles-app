@@ -8,16 +8,9 @@ SetupService setup = Get.isRegistered<SetupService>()
     : Get.put(SetupService());
 
 class SetupService extends GetxService {
-  Future<void> startSetup(
-    int numberOfMessagesPerPage,
-    bool skipEmptyChats,
-    bool saveToDownloads, {
-    int? syncStartDate,
-  }) async {
-    sync.numberOfMessagesPerPage = numberOfMessagesPerPage;
-    sync.skipEmptyChats = skipEmptyChats;
-    sync.saveToDownloads = saveToDownloads;
-    sync.syncStartDate = syncStartDate;
+  /// Start the setup process
+  /// RustPush handles sync differently - just runs contacts refresh
+  Future<void> startSetup() async {
     await sync.startFullSync();
     await finishSetup();
   }

@@ -4,12 +4,10 @@ import 'dart:isolate';
 import 'package:bluebubbles/helpers/backend/startup_tasks.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
-import 'package:bluebubbles/main.dart';
 import 'package:bluebubbles/services/network/http_overrides.dart';
 import 'package:bluebubbles/utils/logger/logger.dart';
 import 'package:bluebubbles/services/services.dart';
 import 'package:bluebubbles/services/network/backend_service.dart';
-import 'package:bluebubbles/services/backend/sync/handle_cache.dart';
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -23,43 +21,11 @@ SyncService sync = Get.isRegistered<SyncService>()
     : Get.put(SyncService());
 
 class SyncService extends GetxService {
-  int numberOfMessagesPerPage = 25;
-  bool skipEmptyChats = true;
-  bool saveToDownloads = false;
-
-  /// Start date for syncing messages (null = sync all messages)
-  /// Represented as milliseconds since epoch
-  int? syncStartDate;
   final RxBool isIncrementalSyncing = false.obs;
 
-  FullSyncManager? _manager;
-  FullSyncManager? get fullSyncManager => _manager;
-
-  /// Number of chats to sync in parallel (default: 5)
-  int parallelChats = 5;
-
   Future<void> startFullSync() async {
-    // Set the last sync date (for incremental, even though this isn't incremental)
-    // We won't try an incremental sync until the last (full) sync date is set
-    if (backend.getRemoteService() == null) {
-      await cs.refreshContacts();
-      return; // no syncing if no remote
-    }
-    ss.settings.lastIncrementalSync.value =
-        DateTime.now().millisecondsSinceEpoch;
-    await ss.saveSettings();
-
-    // Pre-warm handle cache for better performance during sync
-    await handleCache.warmUp();
-
-    _manager = FullSyncManager(
-      startTimestamp: syncStartDate ?? 0,
-      messageCount: numberOfMessagesPerPage.toInt(),
-      skipEmptyChats: skipEmptyChats,
-      parallelChats: parallelChats,
-      saveLogs: saveToDownloads,
-    );
-    await _manager!.start();
+    // RustPush handles sync differently - just refresh contacts
+    await cs.refreshContacts();
   }
 
   Future<void> startIncrementalSync() async {
@@ -147,23 +113,11 @@ Future<List<List<int>>> incrementalSyncIsolate(List? items) async {
       http.originOverride = address;
     }
 
-    if (usingRustPush) {
-      // just do contacts
-      final refreshedItems = await cs.refreshContacts();
-      Logger.info('Finished contact refresh, shouldRefresh $refreshedItems');
-      port?.send(refreshedItems);
-      return refreshedItems;
-    }
-
-    int syncStart = ss.settings.lastIncrementalSync.value;
-    int startRowId = ss.settings.lastIncrementalSyncRowId.value;
-    final incrementalSyncManager = IncrementalSyncManager(
-      startTimestamp: syncStart,
-      startRowId: startRowId,
-      saveMarker: true,
-    );
-    await incrementalSyncManager.start();
-    chats.sort();
+    // RustPush mode: just do contacts refresh
+    final refreshedItems = await cs.refreshContacts();
+    Logger.info('Finished contact refresh, shouldRefresh $refreshedItems');
+    port?.send(refreshedItems);
+    return refreshedItems;
   } catch (ex, s) {
     Logger.error('Incremental sync failed!', error: ex, trace: s);
   }

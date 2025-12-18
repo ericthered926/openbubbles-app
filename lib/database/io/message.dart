@@ -11,7 +11,6 @@ import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/database/database.dart';
 import 'package:bluebubbles/database/models.dart';
 import 'package:bluebubbles/services/services.dart';
-import 'package:bluebubbles/services/backend/sync/handle_cache.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -200,7 +199,7 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
           .where((element) => !existingMessageGuids.contains(element.guid))
           .toList();
 
-      // 5. Fetch handles using cache (optimization: uses LRU cache with DB fallback)
+      // 5. Fetch handles from database
       // Get unique handle ROWIDs from messages
       final handleRowIds = inputMessages
           .map((m) => m.handleId)
@@ -209,10 +208,19 @@ class BulkSaveNewMessages extends AsyncTask<List<dynamic>, List<Message>> {
           .toSet()
           .toList();
 
-      // Use cache for handle lookups (queries DB only for cache misses)
-      final handleMap = handleRowIds.isNotEmpty
-          ? handleCache.getByRowIds(handleRowIds)
-          : <int, Handle>{};
+      // Query handles from database
+      Map<int, Handle> handleMap = {};
+      if (handleRowIds.isNotEmpty) {
+        final handles = Database.handles
+            .query(Handle_.originalROWID.oneOf(handleRowIds))
+            .build()
+            .find();
+        for (final h in handles) {
+          if (h.originalROWID != null) {
+            handleMap[h.originalROWID!] = h;
+          }
+        }
+      }
 
       for (final msg in inputMessages) {
         msg.chat.target = inputChat;

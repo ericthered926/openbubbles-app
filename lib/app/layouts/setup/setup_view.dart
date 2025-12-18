@@ -12,12 +12,8 @@ import 'package:bluebubbles/app/layouts/setup/pages/rustpush/phone_number.dart';
 import 'package:bluebubbles/helpers/helpers.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/setup_checks/battery_optimization.dart';
 import 'package:bluebubbles/app/layouts/setup/dialogs/failed_to_connect_dialog.dart';
-import 'package:bluebubbles/app/layouts/setup/pages/sync/sync_settings.dart';
-import 'package:bluebubbles/app/layouts/setup/pages/sync/server_credentials.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/contacts/request_contacts.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/bluetooth/request_bluetooth.dart';
-import 'package:bluebubbles/app/layouts/setup/pages/setup_checks/mac_setup_check.dart';
-import 'package:bluebubbles/app/layouts/setup/pages/sync/sync_progress.dart';
 import 'package:bluebubbles/app/layouts/setup/pages/welcome/welcome_page.dart';
 import 'package:bluebubbles/app/wrappers/stateful_boilerplate.dart';
 import 'package:bluebubbles/main.dart';
@@ -519,10 +515,8 @@ class SetupViewController extends StatefulController {
         ss.saveSettings();
       }
 
-      var defaultPassword = Random.secure()
-          .nextInt(1000000)
-          .toString()
-          .padLeft(6, '0');
+      var defaultPassword =
+          Random.secure().nextInt(1000000).toString().padLeft(6, '0');
       ss.settings.keychainDefaultPassword.value = defaultPassword;
       ss.saveSettings();
 
@@ -609,11 +603,6 @@ class SetupViewController extends StatefulController {
     updateWidgets<PageNumber>(newPage);
   }
 
-  void updateNumberToDownload(int num) {
-    numberToDownload = num;
-    updateWidgets<NumberOfMessagesText>(num);
-  }
-
   void handleOfflineError(String newError, String? currentTicket) {
     if (newError.contains("Sorry, your hosted device is currently offline!")) {
       showDialog(
@@ -649,8 +638,7 @@ class SetupViewController extends StatefulController {
                 Navigator.of(context).pop();
                 wrapPromise(
                   (() async {
-                    var relay =
-                        currentTicket ??
+                    var relay = currentTicket ??
                         await api.validateRelay(state: pushService.state);
                     if (relay == null) {
                       throw Exception("Failed to validate!");
@@ -753,9 +741,8 @@ class _SetupViewState extends OptimizedState<SetupView> {
         }
 
         controller.currentPhoneUsers[int.parse(
-              items.key.replaceFirst("sms-auth-", ""),
-            )] =
-            user;
+          items.key.replaceFirst("sms-auth-", ""),
+        )] = user;
       }
     })();
 
@@ -946,12 +933,7 @@ class _PageNumberState
                       ),
                     ),
                     TextSpan(
-                      text:
-                          " of ${kIsWeb
-                              ? "4"
-                              : kIsDesktop
-                              ? "5"
-                              : "9"}",
+                      text: " of ${kIsWeb ? "4" : kIsDesktop ? "5" : "9"}",
                       style: context.theme.textTheme.bodyLarge!.copyWith(
                         color: Colors.white38,
                         fontWeight: FontWeight.bold,
@@ -1025,18 +1007,13 @@ class SetupPages extends StatelessWidget {
             if (!kIsWeb && !kIsDesktop) RequestContacts(),
             if (!kIsWeb && !kIsDesktop) BatteryOptimizationCheck(),
             if (!kIsWeb && !kIsDesktop) RequestBluetooth(),
-            if (!usingRustPush) MacSetupCheck(),
-            if (!usingRustPush) ServerCredentials(),
-            if (!kIsWeb && !usingRustPush) SyncSettings(),
-            if (!usingRustPush) SyncProgress(),
-            if (usingRustPush) HwInp(key: controller._childKey),
-            if (usingRustPush &&
-                controller.supportsPhoneReg.value &&
-                !kIsDesktop)
+            // RustPush setup flow
+            HwInp(key: controller._childKey),
+            if (controller.supportsPhoneReg.value && !kIsDesktop)
               const PhoneNumber(),
-            if (usingRustPush) AppleIdLogin(),
-            if (usingRustPush) AppleId2FA(),
-            if (usingRustPush) FinalizePage(),
+            AppleIdLogin(),
+            AppleId2FA(),
+            FinalizePage(),
             //ThemeSelector(),
           ],
         ),
@@ -1110,12 +1087,12 @@ class _ErrorTextState
                           ),
                         ),
                         onPressed: () async {
-                          final res = await picker.FilePicker.platform
-                              .pickFiles(
-                                withData: true,
-                                type: picker.FileType.custom,
-                                allowedExtensions: ['png', 'jpg', 'jpeg'],
-                              );
+                          final res =
+                              await picker.FilePicker.platform.pickFiles(
+                            withData: true,
+                            type: picker.FileType.custom,
+                            allowedExtensions: ['png', 'jpg', 'jpeg'],
+                          );
                           if (res == null || res.count == 0) return;
                           attachment = await File(
                             res.files[0].path!,
@@ -1147,9 +1124,7 @@ class _ErrorTextState
                                   child: Center(
                                     child: CircularProgressIndicator(
                                       backgroundColor: context
-                                          .theme
-                                          .colorScheme
-                                          .properSurface,
+                                          .theme.colorScheme.properSurface,
                                       valueColor: AlwaysStoppedAnimation<Color>(
                                         context.theme.colorScheme.primary,
                                       ),
@@ -1166,9 +1141,8 @@ class _ErrorTextState
                                 ? "${fs.appDocDir.path}/../files/logs"
                                 : "${fs.appDocDir.path}/logs",
                           );
-                          final List<FileSystemEntity> entities = await file
-                              .list()
-                              .toList();
+                          final List<FileSystemEntity> entities =
+                              await file.list().toList();
                           var current = entities.indexWhere(
                             (element) => element.path.endsWith("CURRENT.log"),
                           );
